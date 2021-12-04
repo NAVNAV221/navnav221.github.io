@@ -16,7 +16,7 @@ author: navnav221
 navbar-links:
   About Me: "aboutme"
   Resources:
-    - Beautiful Jekyll: "https://beautifuljekyll.com"
+    - HTB Conclusions: "https://navnav221.github.io/htb_conclusion_series/"
     - Learn markdown: "https://www.markdowntutorial.com/"
   Author's home: "https://navnav221.github.io"
 
@@ -235,7 +235,7 @@ defaults:
       layout: "page"
 
 collections:
-        htb_conclusions:
+        htb_conclusion_series:
                 output: true
 
 
