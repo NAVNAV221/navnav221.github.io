@@ -1,5 +1,5 @@
 ---
-layout: post
+layout: default
 title: HTB conclusions series
 subtitle: Here I'll write about conclusions I had from some HTB machines I solved.
 tags: [HTB]
@@ -7,11 +7,6 @@ comments: true
 ---
 {% for htb in site.htb_conclusions %}
 - <a href="{{ htb.url }}">{{ htb.machine_name }} - {{ htb.date | date: "%-d %B %Y" }}</a>
-# <h2>
-#    <a href="{{ htb.url }}">
-#      - i'll put here a name
-#    </a>
-#  </h2>
 {% endfor %}
 
 This is a demo post to show you how to write blog posts with markdown.  I strongly encourage you to [take 5 minutes to learn how to write in markdown](https://markdowntutorial.com/) - it'll teach you how to transform regular text into bold/italics/headings/tables/etc.
