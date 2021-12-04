@@ -6,11 +6,12 @@ tags: [HTB]
 comments: true
 ---
 {% for htb in site.htb_conclusions %}
-  <h2>
-    <a href="{{ htb.url }}">
-      i'll put here a name
-    </a>
-  </h2>
+- <a href="{{ htb.url }}">{{ htb.machine_name }} - {{ htb.date }}</a>
+# <h2>
+#    <a href="{{ htb.url }}">
+#      - i'll put here a name
+#    </a>
+#  </h2>
 {% endfor %}
 
 This is a demo post to show you how to write blog posts with markdown.  I strongly encourage you to [take 5 minutes to learn how to write in markdown](https://markdowntutorial.com/) - it'll teach you how to transform regular text into bold/italics/headings/tables/etc.

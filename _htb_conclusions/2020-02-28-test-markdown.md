@@ -1,5 +1,6 @@
 ---
 layout: post
+machine_name: Omni
 title: HTB conclusions series
 subtitle: Here I'll write about conclusions I had from some HTB machines I solved.
 tags: [HTB]
