@@ -1,6 +1,6 @@
 ---
 layout: page
-title: navnav221 | whoami
+title: whoami
 subtitle: Kinda of nerd, but cool one
 ---
 
