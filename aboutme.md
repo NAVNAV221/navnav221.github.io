@@ -1,7 +1,7 @@
 ---
 layout: page
-title: whoami
-subtitle: Why you'd not want to go on a date with me
+title: navnav221 | whoami
+subtitle: Kinda of nerd, but cool one
 ---
 
 - Preaper to my OSCP.
