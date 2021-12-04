@@ -6,7 +6,7 @@ tags: [HTB]
 comments: true
 ---
 {% for htb in site.htb_conclusions %}
-- <a href="{{ htb.url }}">{{ htb.machine_name }} - {{ htb.date }}</a>
+- <a href="{{ htb.url }}">{{ htb.machine_name }} - {{ htb.date | date: "%-d %B %Y" }}</a>
 # <h2>
 #    <a href="{{ htb.url }}">
 #      - i'll put here a name
