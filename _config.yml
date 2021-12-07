@@ -7,7 +7,8 @@
 
 # Name of website
 title: NavSec Blog
-
+title_separator: "|"
+name: "Navnav221"
 # Your name to show in the footer
 author: navnav221
 
@@ -16,7 +17,7 @@ author: navnav221
 navbar-links:
   About Me: "aboutme"
   Resources:
-    - HTB Conclusions: "https://navnav221.github.io/htb_conclusion_series/"
+    - HTB: "https://navnav221.github.io/htb/"
     - Learn markdown: "https://www.markdowntutorial.com/"
   Author's home: "https://navnav221.github.io"
 
@@ -37,10 +38,10 @@ round-avatar: true
 # Select the social network links that you want to show in the footer.
 # Uncomment the links you want to show and add your information to each one.
 social-network-links:
-  email: "someone@example.com"
-  rss: true  # remove this line if you don't want to show an RSS link at the bottom
+  email: "navve2008@gmail.com"
+  #rss: true  # remove this line if you don't want to show an RSS link at the bottom
   #facebook: deanattali
-  github: daattali
+  github: navnav221
   #twitter: daattali
   #patreon: DeanAttali
   #youtube: c/daattali
@@ -235,8 +236,10 @@ defaults:
       layout: "page"
 
 collections:
-        htb_conclusion_series:
-                output: true
+    htb:
+      output: true  
+      writeups: true
+      misc: true
 
 
 # Exclude these files from production site

@@ -1,13 +1,12 @@
 ---
 layout: post
-title: HTB conclusions series
-subtitle: Here I'll write about conclusions I had from some HTB machines I solved.
-tags: [HTB]
+os: windows
+machine_name: omni 
+title: omni machine writeup
+subtitle: Very cool machine that involve kerberos and Impacket's scripts usage.
+tags: [HTB, Active, ASREProast, Kerberos]
 comments: true
 ---
-{% for htb in site.htb %}
-<a href="{{ htb.url }}">{{ htb.title }} OS:[{{ htb.os }}]</a>
-{% endfor %}
 
 This is a demo post to show you how to write blog posts with markdown.  I strongly encourage you to [take 5 minutes to learn how to write in markdown](https://markdowntutorial.com/) - it'll teach you how to transform regular text into bold/italics/headings/tables/etc.
 

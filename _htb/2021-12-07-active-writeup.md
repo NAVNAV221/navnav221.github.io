@@ -1,9 +1,10 @@
 ---
 layout: post
-machine_name: Omni
-title: HTB conclusions series
-subtitle: Here I'll write about conclusions I had from some HTB machines I solved.
-tags: [HTB]
+os: windows
+machine_name: active 
+title: Active machine writeup
+subtitle: Very cool machine that involve kerberos and Impacket's scripts usage.
+tags: [HTB, Active, ASREProast, Kerberos]
 comments: true
 ---
 
