@@ -241,6 +241,8 @@ collections:
       writeups: true
       misc: true
 
+# Make pages folder to seems like root directory - 'https://~~~~/page1'
+include: ['_pages']
 
 # Exclude these files from production site
 exclude:
