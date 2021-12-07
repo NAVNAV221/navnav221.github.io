@@ -1,4 +1,5 @@
 ---
+permalink: "/aboutme/"
 layout: page
 title: whoami
 subtitle: Kinda of nerd, but cool one
