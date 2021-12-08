@@ -20,6 +20,7 @@ title: Categories
 	{% if post.os %} [{{ post.os }}]{% endif %}
       </h4>
     </article>
+    <hr>
     {% endfor %}
   </div>
 {% endfor %}

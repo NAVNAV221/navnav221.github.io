@@ -5,8 +5,9 @@ machine_name: active
 title: Active machine writeup
 subtitle: Very cool machine that involve kerberos and Impacket's scripts usage.
 categories: HTB
-cover-img: /assets/img/path.jpg
-tags: [HTB, Active, ASREProast, Kerberos]
+cover-img: /assets/img/kerberos-windows.png
+thumbnail: /assets/img/active-htb.png
+tags: [HTB, ASREProast, Kerberos]
 comments: true
 ---
 
