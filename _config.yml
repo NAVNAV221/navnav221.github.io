@@ -16,10 +16,10 @@ author: navnav221
 
 navbar-links:
   About Me: "aboutme"
-  Resources:
-    - HTB: "https://navnav221.github.io/htb/"
-    - Learn markdown: "https://www.markdowntutorial.com/"
-  Author's home: "https://navnav221.github.io"
+  Categories: "categories"  
+#  Resources:
+#    - HTB: "https://navnav221.github.io/htb/"
+#    - Learn markdown: "https://www.markdowntutorial.com/"
 
 # --- Logo --- #
 
@@ -234,12 +234,6 @@ defaults:
       path: "" # any file that's not a post will be a "page" layout by default
     values:
       layout: "page"
-
-collections:
-    htb:
-      output: true  
-      writeups: true
-      misc: true
 
 # Make pages folder to seems like root directory - 'https://~~~~/page1'
 include: ['_pages']

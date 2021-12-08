@@ -1,8 +1,8 @@
 ---
 layout: post
 os: windows
-machine_name: active 
-title: Active machine writeup
+machine_name: omni 
+title: omni machine writeup
 subtitle: Very cool machine that involve kerberos and Impacket's scripts usage.
 tags: [HTB, Active, ASREProast, Kerberos]
 comments: true
