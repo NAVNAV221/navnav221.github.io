@@ -1,5 +1,5 @@
 ---
 layout: home
-title: My website
-subtitle: Hi dude.
+title: Learning Resource
+subtitle: The more I know, I don't know.
 ---
