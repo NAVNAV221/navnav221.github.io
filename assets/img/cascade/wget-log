@@ -1,0 +1,11 @@
+--2022-07-13 10:38:55--  https://www.howtogeek.com/wp-content/uploads/2019/05/img_5cf06a87ccc49.png?height=200p
+Resolving www.howtogeek.com (www.howtogeek.com)... 199.232.58.49
+Connecting to www.howtogeek.com (www.howtogeek.com)|199.232.58.49|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 125287 (122K) [image/png]
+Saving to: ‘img_5cf06a87ccc49.png?height=200p’
+
+          img_5cf06   0%[                    ]       0  --.-KB/s               img_5cf06a87ccc49.p 100%[===================>] 122.35K  --.-KB/s    in 0.1s    
+
+2022-07-13 10:38:56 (1.11 MB/s) - ‘img_5cf06a87ccc49.png?height=200p’ saved [125287/125287]
+
