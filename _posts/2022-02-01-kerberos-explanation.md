@@ -3,8 +3,8 @@ layout: post
 title: About Kerberos
 subtitle: Explanation of Kerberos protocol and the related attacks
 categories: Windows Protocols
-cover-img: /assets/img/kerberos-windows.png
-thumbnail-img: /assets/img/active-htb.png
+cover-img: /assets/img/kerberos/cerberus_dogs_cover_img.png
+thumbnail-img: /assets/img/kerberos/cerberus_dogs_wallpaper.png
 tags: [Kerberos, ASREProast, Pass The Ticket, Golden Ticket, Silver Ticket, Kerberoasting, Impacket]
 comments: true
 ---
