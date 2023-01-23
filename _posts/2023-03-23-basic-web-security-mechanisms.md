@@ -49,19 +49,3 @@ Writing requests are enabled by SOP, write operations refer to clicking on links
 ### Read [Not enabled]
 
 Readings from another site are prohibited by SOP, so site one can’t steal the content from site two.
-
-![image-20220723100654193](/assets/img/kerberos/KRB_AS_REQ.png)
-
-## Keys :key:
-
-### User secret key
-
-A key that is derived from the user password hash.
-
-### Session key
-
-Used during the conversation between the TGS and the User. The user gets this key inside the KRB_AS_REP packet.
-
-### Service (AP) key
-
-This key derivative from the NTLM hash of service owner, (which can be a user or computer account) and used for the communication between the User and the Service.
