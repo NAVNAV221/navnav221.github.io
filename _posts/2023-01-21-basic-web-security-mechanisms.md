@@ -31,7 +31,7 @@ domain A can access resources from domain B → problem. why? Let’s imagine th
 When website A wants to get resources (files, images, videos, etc...) from website B it may cause security issues because maybe the other side - A for example is an attacker that uses my website resources and uses them against me: Phishing, CSRF, etc…
 For security reasons, browsers restrict HTTP cross origin requests initiated from script: JS code served from https://domain-a.com uses XMLHttpRequest to make requests to https://domain-b.com/data.json. As a result XMLHttpRequest and FetchAPI follow the Same Origin Policy, this means that domain-a can access domain-b’s data if and only if the right CORS headers like Allow-Control-Allow-Origin are associated with the request.
 
-[img of cors]
+![cors_usage_illustrate](/assets/img/web/cors.png)
 
 So after we understand the process behind the HTTP request between the two sides:
 Cross Origin Resource Sharing is an HTTP header based mechanism that allows a server to indicate any origins (domain, scheme or port) - other than its own, which a browser should permit loading of resources. Behind the scenes, the browser requests the server hosting the cross-origin resource, in order to check that the server will permit the actual request.
