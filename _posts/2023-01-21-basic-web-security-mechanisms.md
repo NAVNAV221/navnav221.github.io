@@ -49,3 +49,15 @@ Writing requests are enabled by SOP, write operations refer to clicking on links
 ### Read [Not enabled]
 
 Readings from another site are prohibited by SOP, so site one can’t steal the content from site two.
+
+# Can I pass this shit ?
+
+## JSONP
+
+"JSON with padding". This method enables bypassing Same Origin Policy because it enables transfering JSON data between different origins within a script tag:
+
+![image-20230126230629233](/assets/img/web/jsonp_script_tag_implementation.png)
+
+[This program will print all the json data from the different origin to the browser console]
+Notice the callback parameter, as you already saw it’s called JSONP - JSON with Padding and the padding means the function (the function that is mentioned in the callback parameter) that warps the JSON payload. If you don’t specify a callback parameter so it won’t be consider as JSONP and probably disabled by the browser because X-Content-Type-Options header or the CORB - Cross Origin Read Blocking (Chrome security feature that came to prevent delivering a Cross Origin requests to a webpage).
+
