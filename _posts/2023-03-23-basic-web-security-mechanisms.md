@@ -1,5 +1,6 @@
 ---
 layout: post
+os: Shit
 title: Basic web security mechanisms
 subtitle: Explanation of CSP, SOP and CORS
 categories: Web
