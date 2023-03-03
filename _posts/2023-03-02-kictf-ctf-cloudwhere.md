@@ -1,11 +1,11 @@
 ---
 layout: post
-title: Winlogon
-subtitle: Explanation of Kerberos protocol and the related attacks
-categories: Windows Protocols
-cover-img: /assets/img/kerberos/cerberus_dogs_cover_img.png
-thumbnail-img: /assets/img/kerberos/cerberus_dogs_wallpaper.png
-tags: [Mimikatz, LSASS, Winlogon]
+title: KITCTF - Cloudwhere
+subtitle: Whitebox web ctf
+categories: CTF Web
+cover-img: /assets/img/ctf/kitctf/cloudwhere/cloudflare_logo.png
+thumbnail-img: /assets/img/ctf/kitctf/kitctf_logo.png
+tags: [NodeJs, Web, CTF, whitebox]
 comments: true
 ---
 # איפה להתחיל ?
