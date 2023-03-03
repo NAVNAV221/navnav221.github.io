@@ -10,7 +10,11 @@ comments: true
 ---
 # איפה להתחיל ?
 
+<div dir="rtl">
+
 נתחיל מהסוף להתחלה, איפה הדגל? אפשר לראות ב- Dockerfile  את הניתוב של הדגל שאנחנו צריכים:
+
+</div>
 
 ![image-20230301054111532](/assets/img/ctf/kitctf/cloudwhere/cat_flag.png)
 
