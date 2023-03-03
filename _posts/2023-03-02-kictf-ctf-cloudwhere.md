@@ -8,8 +8,6 @@ thumbnail-img: /assets/img/kerberos/cerberus_dogs_wallpaper.png
 tags: [Mimikatz, LSASS, Winlogon]
 comments: true
 ---
-<div dir="rtl">
-
 # איפה להתחיל ?
 
 נתחיל מהסוף להתחלה, איפה הדגל? אפשר לראות ב- Dockerfile  את הניתוב של הדגל שאנחנו צריכים:
@@ -87,4 +85,3 @@ Cf-connecting-ip בא להגיד לשרת מה ה- IP של הלקוח שפונה
 ![image-20230301054907285](/assets/img/ctf/kitctf/cloudwhere/flag_output.png)
 
 😁
-</div>
