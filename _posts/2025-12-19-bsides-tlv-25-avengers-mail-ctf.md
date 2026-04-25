@@ -12,9 +12,15 @@ comments: true
 
 This weekend, I had the pleasure of contributing a Web challenge to **BSidesTLV 2025** titled **"Avengers Mail"**.
 
-The premise was simple: _"Cause if we can’t protect our Mail, you can be damn sure we’ll avenge it."_ However, it turns out that even Earth's Mightiest Heroes couldn't save this one ([Except JCTF & CamelRiders Teams!👏](https://jctf.team/writeups/BSidesTLV-2025/Avengers_Mail/))—**the challenge ended the competition with two teams that solve that challenge.**
+**I want to thank to [@DaCurse](https://github.com/DaCurse) for the inspiration for this challange! Thanks man :] [@DaCurse](https://github.com/DaCurse).**
 
-Don't feel bad, though! This challenge was designed to highlight a sophisticated and often overlooked vulnerability: **Mail Confusion via Normalization**. Let's dive into how to solve the challenge that stumped every single player in the Web category.
+The premise was simple: _"Cause if we can’t protect our Mail, you can be damn sure we’ll avenge it."_ However, it turns out that even Earth's Mightiest Heroes couldn't save this one ([Except JCTF & CamelRiders Teams!👏](https://jctf.team/writeups/BSidesTLV-2025/Avengers_Mail/))—**the challenge ended the competition with three teams that solve that challenge.**
+
+![Challenge Statistics](/assets/img/ctf/bsidestlv25/avengersMail/statistics_challenge_bsides2025.png)
+
+Don't feel bad, though! This challenge was designed to highlight a sophisticated and often overlooked vulnerability: **Mail Confusion via Normalization**.
+
+Let's dive into how to solve the challenge that stumped every single player in the Web category.
 
 # Initial Reconnaissance
 
