@@ -3,7 +3,7 @@ layout: post
 title: "A Smart Model Doesn't Make Up for Bad Context"
 subtitle: "With the right context, a lean and cheap model can give you the results of an expensive one."
 categories: AI
-cover-img: /assets/img/naboo/naboo-haiku-context-experiment.png
+cover-img: /assets/img/naboo/token-optimizer-cover.png
 thumbnail-img: /assets/img/naboo/naboo-haiku-context-experiment.png
 tags: [AI, Context, Naboo, LLM, Claude]
 comments: true
