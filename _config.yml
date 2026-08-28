@@ -142,7 +142,7 @@ footer-hover-col: "#0085A1"
 
 # Google Search Console site verification token (the content="..." value of the
 # HTML-tag verification method at https://search.google.com/search-console)
-google_site_verification: ""
+google_site_verification: "oIDYeS7th4AVq75VfFL9lIg5MSrA1iWSECa-QGLDHNA"
 
 # Fill in your Google Analytics gtag.js ID to track your website using gtag
 #gtag: ""
