@@ -7,6 +7,7 @@ share-title: "How can I build a Harness?"
 share-description: "A harness is the software your model runs inside. The five parts it depends on, a prompt for each, and why to start from pi instead of a framework."
 categories: Learn
 tags: [Harness, Agents, AI, LLM, Learn]
+thumbnail-img: /assets/img/learn/harness-anatomy.png
 comments: true
 ---
 

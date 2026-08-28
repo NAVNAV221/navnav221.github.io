@@ -7,6 +7,7 @@ share-title: "How to build the right searching tools?"
 share-description: "Lexical, semantic, structured, and graph search each answer a different question and each fails quietly on the others. When to use which, and where RAG actually stops."
 categories: Learn
 tags: [Search, RAG, Retrieval, Embeddings, AI, Learn]
+thumbnail-img: /assets/img/learn/search-methods.png
 comments: true
 ---
 

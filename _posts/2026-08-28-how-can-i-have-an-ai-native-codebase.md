@@ -7,6 +7,7 @@ share-title: "How can I have an AI Native Codebase?"
 share-description: "An agent opening your repo cold repeats the same mistakes every session. Orientation, capability, enforcement, and self-improvement, so it does the right thing the first time."
 categories: Learn
 tags: [AI Native, Agents, Codebase, Claude, Learn]
+thumbnail-img: /assets/img/learn/ai-native-codebase.png
 comments: true
 ---
 
