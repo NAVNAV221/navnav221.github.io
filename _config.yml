@@ -25,7 +25,8 @@ description: "Nave Ben Naim (navnav221) - Founding Engineer at Naboo.ai and secu
 
 navbar-links:
   About Me: "aboutme"
-  Categories: "categories"  
+  Learn: "learn"
+  Categories: "categories"
 #  Resources:
 #    - HTB: "https://navnav221.github.io/htb/"
 #    - Learn markdown: "https://www.markdowntutorial.com/"
