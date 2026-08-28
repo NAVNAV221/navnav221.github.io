@@ -1,0 +1,85 @@
+{%- comment -%}
+Schema.org structured data. Tells search engines that this site belongs to a
+single person, and that the GitHub / LinkedIn / Medium profiles listed in
+`sameAs` are the same entity. This is what makes a name query resolve to this
+site rather than treating each profile as an unrelated page.
+{%- endcomment -%}
+{%- assign person_id = site.url | append: '/#person' -%}
+{%- assign site_id = site.url | append: '/#website' -%}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Person",
+      "@id": {{ person_id | jsonify }},
+      "name": {{ site.author | jsonify }},
+      "alternateName": [
+        "Nave Naim",
+        "navnav221",
+        "navnav",
+        "navebennaim",
+        "NavSec"
+      ],
+      "url": {{ site.url | jsonify }},
+      {%- if site.avatar %}
+      "image": {{ site.avatar | absolute_url | jsonify }},
+      {%- endif %}
+      "jobTitle": "Security Researcher",
+      "worksFor": {
+        "@type": "Organization",
+        "name": "Naboo",
+        "url": "https://naboo.ai"
+      },
+      "knowsAbout": [
+        "Information Security",
+        "Penetration Testing",
+        "Vulnerability Research",
+        "Capture The Flag",
+        "Active Directory",
+        "Kerberos",
+        "Web Application Security",
+        "AI Context Engineering"
+      ],
+      "sameAs": [
+        "https://github.com/{{ site.social-network-links.github }}",
+        "https://www.linkedin.com/in/{{ site.social-network-links.linkedin }}",
+        "https://medium.com/@{{ site.social-network-links.medium }}"
+      ]
+    },
+    {
+      "@type": "WebSite",
+      "@id": {{ site_id | jsonify }},
+      "url": {{ site.url | jsonify }},
+      "name": {{ site.title | jsonify }},
+      "alternateName": "NavSec Blog",
+      "description": {{ site.description | jsonify }},
+      "inLanguage": "en",
+      "publisher": { "@id": {{ person_id | jsonify }} },
+      "author": { "@id": {{ person_id | jsonify }} }
+    }
+    {%- if page.id %},
+    {
+      "@type": "BlogPosting",
+      "@id": {{ page.url | absolute_url | append: '#post' | jsonify }},
+      "mainEntityOfPage": { "@id": {{ page.url | absolute_url | jsonify }} },
+      "headline": {{ page.title | strip_html | jsonify }},
+      {%- if page.subtitle %}
+      "description": {{ page.subtitle | strip_html | jsonify }},
+      {%- endif %}
+      {%- if img != "" %}
+      "image": {{ img | absolute_url | jsonify }},
+      {%- endif %}
+      "datePublished": {{ page.date | date_to_xmlschema | jsonify }},
+      "dateModified": {{ page.last-updated | default: page.date | date_to_xmlschema | jsonify }},
+      "author": { "@id": {{ person_id | jsonify }} },
+      "publisher": { "@id": {{ person_id | jsonify }} },
+      {%- if page.tags and page.tags.size > 0 %}
+      "keywords": {{ page.tags | join: ", " | jsonify }},
+      {%- endif %}
+      "isPartOf": { "@id": {{ site_id | jsonify }} }
+    }
+    {%- endif %}
+  ]
+}
+</script>

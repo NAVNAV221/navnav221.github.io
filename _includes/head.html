@@ -17,16 +17,31 @@
       {{ page.share-description | strip_html | xml_escape }}
     {%- elsif page.subtitle -%}
       {{ page.subtitle | strip_html | xml_escape }}
-    {%- else -%}
+    {%- elsif page.content and page.content != "" -%}
       {%- assign excerpt_length = site.excerpt_length | default: 50 -%}
       {{ page.content | strip_html | xml_escape | truncatewords: excerpt_length | strip }}
+    {%- else -%}
+      {{ site.description | strip_html | xml_escape }}
     {%- endif -%}
   {% endcapture %}
 
-  <title>{{ title }}</title>
+  {%- assign title = title | strip -%}
+  {%- assign site_title = site.title | strip_html | xml_escape -%}
+  {%- capture head_title -%}
+    {%- if title == site_title -%}
+      {{ site_title }}{% if site.title_tagline %} {{ site.title_separator | default: "|" }} {{ site.title_tagline }}{% endif %}
+    {%- else -%}
+      {{ title }} {{ site.title_separator | default: "|" }} {{ site_title }}
+    {%- endif -%}
+  {%- endcapture -%}
+  <title>{{ head_title | strip }}</title>
 
   {% if site.author %}
   <meta name="author" content="{{ site.author }}">
+  {% endif %}
+
+  {% if site.google_site_verification and site.google_site_verification != "" %}
+  <meta name="google-site-verification" content="{{ site.google_site_verification }}">
   {% endif %}
 
   <meta name="description" content="{{ description }}">
@@ -142,6 +157,8 @@
   {% if page.comments and site.staticman.repository and site.staticman.branch %}
   <link rel="stylesheet" href="{{ "/assets/css/staticman.css" | relative_url }}">
   {% endif %}
+
+  {% include structured-data.html %}
 
   {% if page.head-extra %}
     {% for file in page.head-extra %}

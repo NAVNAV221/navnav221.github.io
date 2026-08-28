@@ -6,11 +6,20 @@
 # --- Required options --- #
 
 # Name of website
-title: NavSec Blog
+title: Nave Ben Naim
 title_separator: "|"
-name: "Navnav221"
+# Tagline appended to the site title on the homepage
+title_tagline: "Security Researcher & CTF Player"
+name: "Nave Ben Naim"
 # Your name to show in the footer
-author: navnav221
+author: Nave Ben Naim
+
+# Canonical URL of the site (used for sitemap, canonical tags, structured data)
+url: "https://navnav221.github.io"
+baseurl: ""
+
+# Site-wide description used as the fallback meta description
+description: "Nave Ben Naim (navnav221) - security researcher and CTF player. NavSec Blog: CVE research, Hack The Box and CTF writeups, Active Directory and Kerberos internals, and AI context engineering."
 
 # --- List of links in the navigation bar --- #
 
@@ -78,7 +87,7 @@ share-links-active:
 
 # How to display the link to your website in the footer
 # Remove this if you don't want a link in the footer
-url-pretty: "navnav221.com"
+url-pretty: "navnav221.github.io"
 
 # Excerpt word length - Truncate the excerpt of each post on the feed page to the specified number of words
 excerpt_length: 50
@@ -93,7 +102,7 @@ feed_show_tags: true
 post_search: true
 
 # The keywords to associate with your website, for SEO purposes
-#keywords: "my,list,of,keywords"
+keywords: "Nave Ben Naim, Nave Naim, navnav221, navnav, navebennaim, NavSec, security researcher, CTF, Hack The Box, CVE-2022-34389, Kerberos, Active Directory, penetration testing, Naboo"
 
 # --- Colours / background image --- #
 
@@ -130,6 +139,10 @@ footer-hover-col: "#0085A1"
 #  - "/assets/js/custom-script.js"
 
 # --- Web Analytics Section --- #
+
+# Google Search Console site verification token (the content="..." value of the
+# HTML-tag verification method at https://search.google.com/search-console)
+google_site_verification: ""
 
 # Fill in your Google Analytics gtag.js ID to track your website using gtag
 #gtag: ""
