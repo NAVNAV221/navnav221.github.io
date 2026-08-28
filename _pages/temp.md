@@ -8,7 +8,7 @@ share-description: "Hack The Box machine writeups and CTF challenge solutions by
 ---
 
 These are writeups of Hack The Box machines and CTF challenges I've worked
-through. I try to write the *conclusions* — the technique and why it worked —
+through. I try to write the *conclusions* - the technique and why it worked -
 rather than a command-by-command walkthrough.
 
 <ul>
@@ -16,7 +16,7 @@ rather than a command-by-command walkthrough.
   {% if post.tags contains "HTB" or post.tags contains "CTF" or post.categories contains "CTF" %}
   <li>
     <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
-    <span class="text-muted"> &mdash; {{ post.date | date: site.date_format }}</span>
+    <span class="text-muted"> - {{ post.date | date: site.date_format }}</span>
     {% if post.subtitle %}<br><small class="text-muted">{{ post.subtitle }}</small>{% endif %}
   </li>
   {% endif %}
@@ -26,4 +26,4 @@ rather than a command-by-command walkthrough.
 Everything else lives on the [blog index](/) or under
 [categories](/categories/).
 
-&mdash; [Nave Ben Naim](/aboutme/)
+- [Nave Ben Naim](/aboutme/)

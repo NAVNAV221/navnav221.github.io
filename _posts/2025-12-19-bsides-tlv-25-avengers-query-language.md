@@ -55,7 +55,7 @@ Bingo. Hidden among the standard types, we find a very interesting entry: `Class
 
 Now that we know the `ClassifiedReport` type exists, we need to find the query that allows us to access it. By further inspecting the `Query` type in the schema, we find the field `classifiedReports`.
 
-We can now craft a final query to request all fields—specifically the `id`, `title`, and `content`—from these reports.
+We can now craft a final query to request all fields - specifically the `id`, `title`, and `content` - from these reports.
 
 ```bash
 curl -X POST http://localhost:8080/graphql \
@@ -81,4 +81,4 @@ This challenge demonstrates why **disabling Introspection in production** is a c
 
 Hope you enjoyed this dive into GraphQL security!
 
-— Nave
+\- Nave

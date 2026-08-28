@@ -14,7 +14,7 @@ This weekend, I had the pleasure of contributing a Web challenge to **BSidesTLV 
 
 **I want to thank to [@DaCurse](https://github.com/DaCurse) for the inspiration for this challange! Thanks man :] [@DaCurse](https://github.com/DaCurse).**
 
-The premise was simple: _"Cause if we can’t protect our Mail, you can be damn sure we’ll avenge it."_ However, it turns out that even Earth's Mightiest Heroes couldn't save this one ([Except JCTF & CamelRiders Teams!👏](https://jctf.team/writeups/BSidesTLV-2025/Avengers_Mail/))—**the challenge ended the competition with three teams that solve that challenge.**
+The premise was simple: _"Cause if we can’t protect our Mail, you can be damn sure we’ll avenge it."_ However, it turns out that even Earth's Mightiest Heroes couldn't save this one ([Except JCTF & CamelRiders Teams!👏](https://jctf.team/writeups/BSidesTLV-2025/Avengers_Mail/)) - **the challenge ended the competition with three teams that solve that challenge.**
 
 ![Challenge Statistics](/assets/img/ctf/bsidestlv25/avengersMail/statistics_challenge_bsides2025.png)
 
@@ -109,7 +109,7 @@ We need a payload that passes the domain check by ending in `@comics.staff`, but
 **The Payload Structure:**
 `=?utf-7?q?attacker&AEA-YOUR-SERVER.com&ACA-?=@comics.staff`
 
-The complexity here—and the reason for the 0% solve rate—is the precise construction of this RFC 2047 header. If any part of the `=?utf-7?q?...?=` syntax is slightly off, the parser fails, and the validation blocks the "illegal" characters.
+The complexity here - and the reason for the 0% solve rate - is the precise construction of this RFC 2047 header. If any part of the `=?utf-7?q?...?=` syntax is slightly off, the parser fails, and the validation blocks the "illegal" characters.
 
 # Victory: The Flag
 
@@ -135,4 +135,4 @@ If you have any questions or want to dive deeper into mail exploits, I'm always 
 
 **Thanks to everyone who gave it their best shot at BSidesTLV 2025!**
 
-— Nave
+\- Nave
