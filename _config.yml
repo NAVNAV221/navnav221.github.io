@@ -9,7 +9,7 @@
 title: Nave Ben Naim
 title_separator: "|"
 # Tagline appended to the site title on the homepage
-title_tagline: "Security Researcher & CTF Player"
+title_tagline: "Founding Engineer @ Naboo.ai"
 name: "Nave Ben Naim"
 # Your name to show in the footer
 author: Nave Ben Naim
@@ -19,7 +19,7 @@ url: "https://navnav221.github.io"
 baseurl: ""
 
 # Site-wide description used as the fallback meta description
-description: "Nave Ben Naim (navnav221) - security researcher and CTF player. NavSec Blog: CVE research, Hack The Box and CTF writeups, Active Directory and Kerberos internals, and AI context engineering."
+description: "Nave Ben Naim (navnav221) - Founding Engineer at Naboo.ai and security researcher. NavSec Blog: CVE research, Hack The Box and CTF writeups, Active Directory and Kerberos internals, and AI context engineering."
 
 # --- List of links in the navigation bar --- #
 
@@ -102,7 +102,7 @@ feed_show_tags: true
 post_search: true
 
 # The keywords to associate with your website, for SEO purposes
-keywords: "Nave Ben Naim, Nave Naim, navnav221, navnav, navebennaim, NavSec, security researcher, CTF, Hack The Box, CVE-2022-34389, Kerberos, Active Directory, penetration testing, Naboo"
+keywords: "Nave Ben Naim, Nave Naim, navnav221, navnav, navebennaim, NavSec, Founding Engineer, Naboo.ai, security researcher, CTF, Hack The Box, CVE-2022-34389, Kerberos, Active Directory, penetration testing"
 
 # --- Colours / background image --- #
 

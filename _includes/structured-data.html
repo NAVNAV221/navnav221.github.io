@@ -25,11 +25,15 @@ site rather than treating each profile as an unrelated page.
       {%- if site.avatar %}
       "image": {{ site.avatar | absolute_url | jsonify }},
       {%- endif %}
-      "jobTitle": "Security Researcher",
+      "jobTitle": "Founding Engineer",
       "worksFor": {
         "@type": "Organization",
         "name": "Naboo",
         "url": "https://naboo.ai"
+      },
+      "address": {
+        "@type": "PostalAddress",
+        "addressCountry": "IL"
       },
       "knowsAbout": [
         "Information Security",
