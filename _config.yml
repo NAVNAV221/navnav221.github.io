@@ -262,6 +262,10 @@ exclude:
   - README.md
   - screenshot.png
   - docs/
+  # Gems installed into the workspace by CI. Without this, Jekyll tries to
+  # read the gems' own site templates as site content and the build fails.
+  - vendor/
+  - .bundle/
 
 plugins:
   - jekyll-paginate
