@@ -22,9 +22,9 @@ problems every session:
 - **It does not understand the team.** Not the day to day, not what a customer
   is, not the bigger picture the work sits inside.
 
-The first is what this article is about. The second wants a planning step that
-runs before the agent writes anything, which is its own subject. The third is
-the [harness](/learn/harness/).
+The first is what this article is about. The second is the one the four layers
+below do not fix, so I come back to it at the end. The third is the
+[harness](/learn/harness/).
 
 An AI native codebase fixes the first in the repo itself, so the fix survives
 the session. Four layers.
@@ -243,6 +243,43 @@ session does not repeat it. I want to suffer a mistake once, not twice.
 ```
 {: .prompt data-name="Use this prompt to make a lesson stick between sessions"}
 
+### What the four layers do not fix
+
+Go back to the second problem at the top: it makes your decisions. None of the
+four layers touch it. Orientation tells the agent where things are, capability
+tells it how you do things here, enforcement blocks the edits you banned, and
+self-improvement stops the repeats. An agent can be perfect on all four and
+still choose your auth model at 2am, inside a diff you skim.
+
+The answer is a step that runs before the code, and the field agrees on that
+much. [GitHub Spec Kit](https://github.com/github/spec-kit) runs specify,
+clarify, plan, tasks, implement, with a clarify step whose whole job is to drag
+out what the spec left vague. [Architecture decision
+records](https://adr.github.io/) are having a revival for the same reason: an
+agent that cannot see why something was built a certain way will cheerfully
+refactor the reason away.
+
+Both write the decision down. Neither settles who owns it, and that is the one
+rule I would add.
+
+Treat the document as a rendering of a decision ledger, not as prose you edit
+forward. The decisions are the artifact; the write-up is re-emitted from them
+each round, never appended to. The reason is specific. A document you edit in
+place freezes around the agent's recommendation: it proposed B, wrote three
+sections that assume B, and by the time it reaches you, saying "actually A"
+means arguing with a paragraph instead of answering a question. Re-emit
+instead, and the recommendation stays a recommendation until you have answered.
+
+That is a whole subject and its own article. The smallest version that works
+today is to make the agent stop and put the question in front of you.
+
+```
+Before you write any code for this task, list the decisions you are about to
+make for me. For each one: the question, the options, your recommendation, and
+what it costs to change later. Then stop and wait for my answers.
+```
+{: .prompt data-name="Use this prompt to get your decisions back before the agent makes them"}
+
 ### Start from the template
 
 [ai-native-codebase](https://github.com/NAVNAV221/ai-native-codebase) is a
@@ -262,3 +299,5 @@ Then one skill I actually repeat. Nothing else yet.
 
 - [ai-native-codebase](https://github.com/NAVNAV221/ai-native-codebase), the template
 - [How can I build a Harness?](/learn/harness/), the agent this repo is for
+- [GitHub Spec Kit](https://github.com/github/spec-kit), specify, clarify, plan, tasks, implement
+- [Architecture decision records](https://adr.github.io/), the older idea agents made urgent
