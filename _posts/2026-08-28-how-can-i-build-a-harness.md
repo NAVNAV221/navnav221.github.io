@@ -174,8 +174,37 @@ Then start with the system prompt and tools. Nothing else yet.
 ```
 {: .prompt data-name="Use this prompt to start building your own harness on pi"}
 
+### Or start from mine
+
+I built the skeleton this post describes, so you do not have to start from an
+empty directory: [github.com/NAVNAV221/harness](https://github.com/NAVNAV221/harness).
+
+It is the five parts above with pi underneath, plus the three things a harness
+needs the moment it stops being a demo: a messaging seam, a guardrail layer that
+blocks a tool call in code rather than asking the prompt nicely, and a reflection
+pass that reads each session and proposes what to build next.
+
+Every part you are meant to replace ships as a small reference implementation
+next to an interview that asks what yours is for. Your answers become a spec, and
+the build prompt reads that spec, so what it writes is your harness and not a
+generic one.
+
+It is a Claude Code plugin, so trying it costs two commands and no clone:
+
+```
+/plugin marketplace add NAVNAV221/harness
+/plugin install harness
+/harness:init
+```
+{: .shell}
+
+Four questions later you have a harness with your job in its system prompt and
+your worst case as an enforced rule. The prompts are plain markdown, so if you
+use Codex or pi instead, clone it and paste them in.
+
 ### Reference
 
+- [harness](https://github.com/NAVNAV221/harness), the skeleton from this post, forkable
 - [What is a harness](https://earendil.com/posts/what-is-a-harness/) by earendil, the four part version
 - [pi](https://github.com/badlogic/pi-mono), the harness to build on
 - [A smart model doesn't make up for bad context](/2026-06-21-smart-model-bad-context/), why part 5 matters
