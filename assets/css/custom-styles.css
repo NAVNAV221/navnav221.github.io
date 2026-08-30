@@ -1,0 +1,84 @@
+/* ---------------------------------------------------------------------------
+   Prompt and shell blocks
+   A fenced block on this site is one of two things: a prompt you paste into an
+   agent, or a command you run in a terminal. They used to look identical, so
+   each one now carries a label saying which it is.
+   Markdown usage: put {: .prompt} or {: .shell} on the line after the fence.
+--------------------------------------------------------------------------- */
+
+.highlighter-rouge.prompt,
+.highlighter-rouge.shell {
+  margin-bottom: 1.5rem;
+  border-radius: 0.25rem;
+  overflow: hidden;
+}
+
+.highlighter-rouge.prompt::before,
+.highlighter-rouge.shell::before {
+  display: block;
+  padding: 0.4rem 0.75rem;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+/* The label says what this particular prompt is for, so it comes from the
+   block: {: .prompt data-name="Use this prompt to ..."} */
+.highlighter-rouge.prompt::before {
+  content: attr(data-name);
+  color: #1b4f72;
+  background-color: #d6e7f5;
+}
+
+.highlighter-rouge.shell::before {
+  content: "Run this in your terminal";
+  color: #3d3d3d;
+  background-color: #e4e4e4;
+}
+
+/* The prompt is English, not code. Drop the code-block chrome so it does not
+   read as something to execute. */
+.highlighter-rouge.prompt > .highlight > pre.highlight {
+  background-image: none;
+  background-color: #f2f8fd;
+  border: 1px solid #d6e7f5;
+  border-top: none;
+  border-left: 0.4375rem solid #4a90c2;
+  border-radius: 0;
+  padding: 0.75rem;
+}
+
+.highlighter-rouge.shell > .highlight > pre.highlight {
+  border-top: none;
+  border-radius: 0;
+}
+
+@media print {
+  .highlighter-rouge.prompt::before,
+  .highlighter-rouge.shell::before { color: #000; background: none; padding-left: 0; }
+}
+
+/* A real file from a repo. The label carries its path.
+   Markdown usage: {: .file data-name=".claude/settings.json"} */
+.highlighter-rouge.file {
+  margin-bottom: 1.5rem;
+  border-radius: 0.25rem;
+  overflow: hidden;
+}
+
+.highlighter-rouge.file::before {
+  content: attr(data-name);
+  display: block;
+  padding: 0.4rem 0.75rem;
+  font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #3d3d3d;
+  background-color: #e4e4e4;
+}
+
+.highlighter-rouge.file > .highlight > pre.highlight {
+  border-top: none;
+  border-radius: 0;
+}

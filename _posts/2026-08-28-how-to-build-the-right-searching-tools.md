@@ -25,6 +25,7 @@ methods against one real incident, so you can watch each failure happen.
 git clone https://github.com/NAVNAV221/searching-methods-cookbooks
 cd searching-methods-cookbooks && jupyter lab
 ```
+{: .shell}
 
 ### Lexical, when they paste the exact string
 
@@ -41,6 +42,7 @@ Tokenize so exact compounds survive: CONFIGURATION_IS_MISSING should match as
 itself, not shatter into "configuration" which is in half the corpus.
 Then show me a query where this ranks a stale doc first, so I see the blind spot.
 ```
+{: .prompt data-name="Use this prompt to add lexical (BM25) search to your harness"}
 
 ### Semantic, when they describe it
 
@@ -58,6 +60,7 @@ Cache the vectors so it runs offline. Then test the same incident two ways:
 once with the error pasted, once described. Show me which method wins each,
 and by how much. That gap is why you keep both.
 ```
+{: .prompt data-name="Use this prompt to add semantic search to your harness"}
 
 ### Structured, when the answer is a count
 
@@ -74,6 +77,7 @@ Make the model reason before it commits (chain_of_thought as the first field),
 and gate the keyword filter behind a query_type, so an enumeration does not get
 a text filter bolted on that silently drops rows.
 ```
+{: .prompt data-name="Use this prompt to add structured search to your harness"}
 
 ### Graph, when the question is a relationship
 
@@ -87,6 +91,7 @@ Add graph traversal. Seed it from the top search hits, BFS a few hops,
 stamp each node with the hop that reached it so I can see the blast radius.
 Then show me the component a 3-hop walk misses, so I know where it stops.
 ```
+{: .prompt data-name="Use this prompt to add graph traversal to your harness"}
 
 ### Where RAG actually stops
 

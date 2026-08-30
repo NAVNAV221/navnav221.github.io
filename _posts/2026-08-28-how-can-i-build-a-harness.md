@@ -30,6 +30,7 @@ Before you read another word, run a real harness and watch it work.
 npm install -g @mariozechner/pi-coding-agent
 pi
 ```
+{: .shell}
 
 Give it a task. Watch it call a tool, get the output, and decide what to do
 next. That back and forth is the whole thing. The five parts below are what
@@ -60,6 +61,7 @@ Write the system prompt for my harness. Constraints:
 - State what it must never do before what it should do.
 Then show me which lines would still matter if the model only read half of it.
 ```
+{: .prompt data-name="Use this prompt to write your harness's system prompt"}
 
 ### 2. Tools
 
@@ -75,6 +77,7 @@ Then adversarially review my descriptions: for each pair of tools, tell me
 what question would make the model pick the wrong one. Fix the descriptions
 until you cannot.
 ```
+{: .prompt data-name="Use this prompt to add tool calling to your harness"}
 
 ### 3. Agentic loop
 
@@ -92,6 +95,7 @@ Show me the exit conditions explicitly: done, max turns, repeated failure,
 model asking for something that does not exist.
 Do not add retries, planning, or sub-agents yet. I want the bare loop.
 ```
+{: .prompt data-name="Use this prompt to build the agentic loop"}
 
 ### 4. Translation layer
 
@@ -106,6 +110,7 @@ Handle the parts that actually differ: tool call format, streaming events,
 stop reasons, token accounting.
 Then swap the provider and prove the loop did not change.
 ```
+{: .prompt data-name="Use this prompt to add a translation layer between your loop and the model"}
 
 ### 5. Memory, which is really context management
 
@@ -133,6 +138,7 @@ gets dropped with a note telling the model how to get the rest.
 Show me the token cost per turn before and after.
 Then make it fail loudly: I want to see it warn, not silently truncate.
 ```
+{: .prompt data-name="Use this prompt to add context management to your harness"}
 
 ### All five, in one flow
 
@@ -166,6 +172,7 @@ Read pi's source first and tell me which of the five parts it already
 handles and which I have to write myself.
 Then start with the system prompt and tools. Nothing else yet.
 ```
+{: .prompt data-name="Use this prompt to start building your own harness on pi"}
 
 ### Reference
 
