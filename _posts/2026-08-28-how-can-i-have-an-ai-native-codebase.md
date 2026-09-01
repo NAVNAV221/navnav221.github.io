@@ -236,6 +236,19 @@ One line of fix, and a comment sitting in the file the next person will edit
 rather than in a postmortem nobody reopens. A guardrail that lies to you is
 worse than one you never built, and now nobody has to learn that twice.
 
+Lessons also do not have to start as prose somebody remembered to write. Most
+teams already have years of them sitting in PR comments nobody ever read twice.
+A review skill can mine that: pull the line comments and the argument threads,
+cluster them by theme, count each one, and keep what recurs. A note left once
+is somebody's preference. A note left five times is a rule you never wrote
+down.
+
+Cache that as a file and the next review has a rubric built from your own
+history instead of a style guide, which also makes it arguable: "this was
+flagged in six previous PRs" lands differently from "this looks wrong". Then
+close the loop the other way. A finding that keeps recurring and is still not
+in the lessons library is the next thing to promote.
+
 ```
 Add a self-reflection step after a change: what broke, what I learned, where
 that lesson belongs. Then promote it into the docs or a hook, so the next
@@ -283,10 +296,14 @@ what it costs to change later. Then stop and wait for my answers.
 ### Start from the template
 
 [ai-native-codebase](https://github.com/NAVNAV221/ai-native-codebase) is a
-copy-paste starting point with all four layers stubbed out. It is Claude
-shaped, so the paths are `.claude/`, but the four questions are the same for
-any agent: where am I, what can I do, what runs no matter what, and what do I
-do better next time.
+copy-paste starting point. A `CLAUDE.md` skeleton and a lessons library for
+orientation. Four skills for capability: `plan-task`, `code-tests`,
+`code-review`, `pr-description`. Hooks that already do something rather than
+sitting there as a comment: format on every edit, checklist injected at session
+start, and a PR gate that lints the files you changed and blocks the PR when
+they come back red. It is Claude shaped, so the paths are `.claude/`, but the
+four questions are the same for any agent: where am I, what can I do, what runs
+no matter what, and what do I do better next time.
 
 ```
 Take the ai-native-codebase template and adapt it to my repo.
