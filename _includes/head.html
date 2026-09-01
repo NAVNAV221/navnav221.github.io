@@ -29,7 +29,7 @@
   {%- assign site_title = site.title | strip_html | xml_escape -%}
   {%- capture head_title -%}
     {%- if title == site_title -%}
-      {{ site_title }}{% if site.title_tagline %} {{ site.title_separator | default: "|" }} {{ site.title_tagline }}{% endif %}
+      {{ site_title }}{% if site.title_tagline %} {{ site.title_tagline }}{% endif %}
     {%- else -%}
       {{ title }} {{ site.title_separator | default: "|" }} {{ site_title }}
     {%- endif -%}
