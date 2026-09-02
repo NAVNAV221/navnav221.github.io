@@ -1,195 +1,446 @@
 ---
 layout: post
 permalink: "/learn/harness/"
-title: How can I build a Harness?
-subtitle: The five parts a harness is made of, and a prompt for each one.
-share-title: "How can I build a Harness?"
-share-description: "A harness is the software your model runs inside. The five parts it depends on, a prompt for each, and why to start from pi instead of a framework."
+title: What it took to turn a coding agent into an R&D teammate
+subtitle: Seven PRs in one customer meeting - and nine harness decisions behind them.
+share-title: "What it took to turn a coding agent into an R&D teammate"
+share-description: "What we learned building an AI Harness teammate for an R&D team: the five core parts of a harness, the four production parts we had to add, and the failures that shaped them."
 categories: Learn
 tags: [Harness, Agents, AI, LLM, Learn]
 thumbnail-img: /assets/img/learn/harness-anatomy.png
 comments: true
 ---
 
-A harness is the software your model runs inside. Not the model, not the
-framework wrapped around it. The thing that decides what the model sees,
-what it can do, and when it stops.
+During a one-hour customer meeting, we heard seven complaints and feature
+requests. We passed each one to the AI Harness teammate our R&D team had built. It
+worked on them concurrently, opened seven pull requests, and ran end-to-end
+tests before the meeting ended.
+
+That did not happen by simply giving an agent access to GitHub. We had built the
+system for this kind of work. The harness supplied the shared customer and team
+context; our [AI-native codebase](/learn/ai-native-codebase/) supplied repository
+orientation, repeatable skills, enforced checks, and lessons from previous
+sessions. I published the reusable parts of that setup in the
+[ai-native-codebase repository](https://github.com/NAVNAV221/ai-native-codebase).
+Together, they gave each concurrent task enough context and constraints to
+produce a PR that was ready for review.
+
+Humans still reviewed the code. All seven PRs were eventually merged. They
+were a mix of small fixes and substantial features which, between engineering
+time and the backlog, could otherwise have taken months to reach production.
+
+This sounds like a story about a powerful model. It is not. A capable model was
+necessary, but the model did not know our customers, our architecture, our
+team's decisions, or what “done” meant to us. The **harness** made that context
+and those capabilities available.
+
+Our team built the system together. This article is about what we learned, not
+a claim that I built it alone.
+
+## Table of contents
+
+- [A coding agent is not automatically a teammate](#a-coding-agent-is-not-automatically-a-teammate)
+- [The five parts that made it run](#the-five-parts-that-made-it-run)
+  1. [System prompt](#1-system-prompt)
+  2. [Tools](#2-tools)
+  3. [Agentic loop](#3-agentic-loop)
+  4. [Translation layer](#4-translation-layer)
+  5. [Memory and context management](#5-memory-which-is-really-context-management)
+- [The four parts that made it a teammate](#the-four-parts-that-made-it-a-teammate)
+  1. [Messaging](#6-messaging)
+  2. [Skills](#7-skills)
+  3. [Guardrails](#8-guardrails)
+  4. [Reflection and evaluation](#9-reflection-and-evaluation)
+- [One task, end to end](#one-task-end-to-end)
+- [What we would build differently](#what-we-would-build-differently)
+- [A harness in another domain](#a-harness-in-another-domain)
+- [Learn from one before you build one](#learn-from-one-before-you-build-one)
+- [Reference](#reference)
 
 ![The anatomy of a harness: an agent is a model plus a harness plus an environment. The harness itself is five parts - system prompt, tools, agentic loop, memory, and translation layer.](/assets/img/learn/harness-anatomy.png)
 
-An agent is three things: a **model**, a **harness**, and an **environment**
-it can act on (a shell, a repo, an API, a browser). The model is not yours to
-build. The environment is where the effects happen. The harness is the part
-you own, and it is five parts.
+An agent is a **model**, a **harness**, and an **environment** it can act on: a
+shell, a repository, an API, or a shared workspace. The harness decides what
+the model sees, what it can do, and when it stops.
 
-### Run one before you build one
+The diagram has five core parts. We needed all five. But once the agent became
+a shared teammate instead of a private coding session, we needed four more:
+messaging, skills, guardrails, and reflection.
 
-Before you read another word, run a real harness and watch it work.
+### A coding agent is not automatically a teammate
 
-```
-npm install -g @mariozechner/pi-coding-agent
-pi
-```
-{: .shell}
+A coding agent usually works inside one developer's session. The developer
+carries the context: why a feature matters, what the customer asked for, which
+trade-offs the team already discussed, and who disagreed with what.
 
-Give it a task. Watch it call a tool, get the output, and decide what to do
-next. That back and forth is the whole thing. The five parts below are what
-made it happen.
+A teammate cannot depend on one person's memory. Ours worked in Slack, where
+several people could mention it, reply in threads, contribute opinions, and
+continue work that somebody else had started. It reported progress in Slack
+and in an internal dashboard.
 
-Most people skip straight to tools and a loop, get something working, then hit
-a wall they cannot name. It is almost always one of these five parts they
-never built on purpose. Each part has a prompt. Run it against whatever agent
-you use, Claude Code, Codex, pi.
+That changed the problem. The question was no longer “Can the model write this
+code?” It was:
 
-> [earendil's "What is a harness"](https://earendil.com/posts/what-is-a-harness/)
-> is the clearest writeup of this, and worth reading. It names four parts. I
-> count the same four plus memory, because deciding what the model *remembers*
-> and what it *sees each turn* is its own job. More on that in part 5.
+- Can it recover the intent behind the task?
+- Can it find the team's previous decisions without reading everything?
+- Can it use our operational tools correctly?
+- Can it show its work where the team already collaborates?
+- Can it act safely on behalf of different people?
+
+Those are harness questions.
+
+## The five parts that made it run
 
 ### 1. System prompt
 
-Instructions injected on every single turn. First-day instructions for a new
-hire, not documentation.
+The system prompt defines the model's behavior for the session. It is useful
+for broad, stable rules: its role, its boundaries, and what completion means.
+It is not the right place for every query syntax, team convention, and lesson
+from an old debugging session.
 
-People write essays here. The model does not need your philosophy. It needs
-rules it can follow when it is halfway through a task and running low on room.
+We learned to keep it closer to first-day instructions than company
+documentation. A rule should describe behavior the model can obey or violate.
+Task-specific procedures belong elsewhere.
 
+**Example**
+
+A generic system prompt for this kind of teammate could begin:
+
+```markdown
+You are an R&D teammate working in a shared environment.
+- Never merge a pull request. A human must review and merge it.
+- Do not claim a task is complete without evidence from the required checks.
+- Ask for approval before an action affects production or external users.
+- Keep progress and results in the task's shared thread.
 ```
-Write the system prompt for my harness. Constraints:
-- Rules, not prose. Each line should be something the model can obey or violate.
-- No motivation, no tone-setting, no "you are a helpful assistant".
-- State what it must never do before what it should do.
-Then show me which lines would still matter if the model only read half of it.
-```
-{: .prompt data-name="Use this prompt to write your harness's system prompt"}
+{: .file data-name="Illustrative system prompt"}
+
+The prompt establishes stable boundaries. It does not explain how to query
+traces or test a particular repository; those procedures belong in skills.
+
+**Build checkpoint**
+
+- Write explicit rules rather than an essay about the agent's personality.
+- Put prohibitions and approval requirements before preferences.
+- Define what evidence the agent needs before claiming a task is complete.
+- Do not use the system prompt as a database for changing team knowledge.
 
 ### 2. Tools
 
-What the model can actually do. The harness describes the tool. It does not
-decide when to use it, the model does, by reading your description.
+Tools determine what the teammate can actually do. Ours could work with code,
+internal systems, and our observability environment built around Grafana and
+OpenTelemetry.
 
-That last part is the whole game. A vague description is a broken router.
+More tools did not make it more capable. Giving it many MCP tools often filled
+its context with irrelevant descriptions and sent it searching in the wrong
+places. We paid for those mistakes in latency and tokens.
 
+Tool descriptions also did not prevent every repeated failure. In one case,
+the teammate kept calling a function with the same bad query parameters. The
+system prompt was too general to hold the fix, and the tool error disappeared
+with the session. We had to turn the lesson into durable documentation and a
+better skill.
+
+**Example**
+
+For an investigation, the harness might expose a small chain of tools:
+
+```text
+query_traces(request_id, time_range)
+query_logs(trace_id, service)
+launch_coding_session(repository, task)
+open_pull_request(branch, title, evidence)
 ```
-Add tool calling to my harness. Start with 3 tools, not 10.
-For each: name, one-line description, JSON schema for the arguments.
-Then adversarially review my descriptions: for each pair of tools, tell me
-what question would make the model pick the wrong one. Fix the descriptions
-until you cannot.
-```
-{: .prompt data-name="Use this prompt to add tool calling to your harness"}
+
+The tools provide access to telemetry and code. They do not teach the model the
+order in which our team uses them; that is the skill's job.
+
+**Build checkpoint**
+
+- Start with the smallest tool set that can complete one real task.
+- Give every tool a narrow description and a strict argument schema.
+- Test which requests make the model choose the wrong tool.
+- Return errors that explain how to correct the call, not only that it failed.
+- Measure the tokens spent exposing and calling tools that were never useful.
 
 ### 3. Agentic loop
 
-Model picks an action, you execute it, you feed the result back, repeat until
-done. That is it. Every agent framework you have heard of is this loop with
-opinions bolted on.
+The core loop is small:
 
-Build it yourself once before you use one. It is about forty lines, and after
-that the frameworks stop looking like magic.
+1. The model chooses an action.
+2. The harness executes or rejects it.
+3. The result goes back into context.
+4. The model chooses what to do next.
 
+The difficult part is deciding when the loop must stop. “The model said it is
+done” was not enough for us. A code change was not ready until the required
+checks had run, and a human still reviewed the PR before it could be merged.
+
+A useful loop names its exit conditions: completed with evidence, waiting for
+human approval, maximum turns, repeated failure, or a missing capability.
+
+**Example**
+
+One of our code tasks followed this loop:
+
+```text
+Slack request
+  -> recover the task and team context
+  -> launch a coding session
+  -> inspect and edit the repository
+  -> run linters, tests, and E2E checks
+  -> open a pull request with the evidence
+  -> stop and wait for human review
 ```
-Implement the agentic loop by hand, no framework.
-Model decides an action -> I execute it -> result goes back -> repeat.
-Show me the exit conditions explicitly: done, max turns, repeated failure,
-model asking for something that does not exist.
-Do not add retries, planning, or sub-agents yet. I want the bare loop.
-```
-{: .prompt data-name="Use this prompt to build the agentic loop"}
+
+A failed check returned to the coding session as the next observation. Opening
+the PR was an output of the loop; merging it was never an autonomous step.
 
 ### 4. Translation layer
 
-The seam that lets the same harness run on Anthropic, OpenAI, or a local
-model. Build it and you own your harness. Skip it and you have written an
-application for one vendor.
+The translation layer keeps provider details out of the rest of the harness.
+The loop should not care how a provider represents tool calls, streaming
+events, stop reasons, or token usage.
 
+This part is less visible than memory or tools, but it protects every other
+part from becoming an application for one model API. One interface should be
+what your loop calls; provider-specific adapters belong behind it.
+
+**Example**
+
+A generic translation layer can normalize every provider response into one
+shape:
+
+```typescript
+interface ModelResponse {
+  text: string;
+  toolCalls: ToolCall[];
+  stopReason: "done" | "tool_call" | "limit" | "error";
+  usage: { inputTokens: number; outputTokens: number };
+}
 ```
-Put a translation layer between my loop and the model API.
-One interface my loop calls; per-provider adapters behind it.
-Handle the parts that actually differ: tool call format, streaming events,
-stop reasons, token accounting.
-Then swap the provider and prove the loop did not change.
-```
-{: .prompt data-name="Use this prompt to add a translation layer between your loop and the model"}
+
+One provider adapter may decode a streamed tool call while another receives it
+as one object. The agentic loop sees the same `ModelResponse` either way. This
+is an architectural example, not a detail from our internal system.
 
 ### 5. Memory, which is really context management
 
-Your agent runs `cat` on a 50,000 line file. What reaches the model? All of
-it? The first thousand lines? The first thousand plus a warning that it was
-truncated? Nothing, and an error telling the model to grep instead?
+Our teammate needed broad company context and specific team context. We kept
+Slack transcripts, daily summaries, people, and previous sessions. Retrieval
+combined filesystem search, lexical search, embeddings, and summaries.
 
-None of the four parts above answer that. The loop feeds a result back, but
-deciding *what the result is* is a different job from deciding *whether to
-continue*. Conflating them is how you end up with a loop that works fine and
-a model that drowns.
+The important part was not storing everything. It was selecting the few pieces
+that belonged in the current task.
 
-People call this "memory" and think it means what persists across turns. That
-is one case. Truncation, ranking, and what gets rendered each turn are the
-rest. It is all one job: managing what fills the context window.
+Without that selection, the model searched irrelevant places, repeated work,
+re-explained decisions the team had already made, and consumed far more tokens.
+With better context management, it could begin with the relevant customer,
+team, and session history instead of rediscovering them.
 
-I have [written about why this decides outcomes](/2026-06-21-smart-model-bad-context/)
-more than model choice does. It is the part people skip and the part that
-bites hardest.
+This is why I count memory as its own harness component. Persistence is only
+half of it. The harness must also decide what reaches the model, what is
+summarized, what is omitted, and how the model can retrieve the rest.
 
+**Example**
+
+A customer had configured a glossary, but the product initially failed to use
+the relevant term. Instead of starting from zero, the teammate could retrieve
+the customer's configuration, earlier Slack discussion, daily summary, and the
+previous investigation. It then used that narrow context to investigate why
+the correct information had not been selected.
+
+The alternative was to inject every customer transcript and every previous
+session. That would cost more while making the useful evidence harder to find.
+
+**Build checkpoint**
+
+- Separate company, team, person, and session knowledge.
+- Retrieve context for the current task instead of injecting the full history.
+- Put a visible limit on every tool result and say when content was truncated.
+- Measure context size and cost per turn.
+- Treat isolation between teams and users as a security boundary, not a
+  retrieval-quality problem.
+
+I have [written more about why context can matter more than model
+choice](/2026-06-21-smart-model-bad-context/).
+
+## The four parts that made it a teammate
+
+The five-part anatomy explains a working agent. A shared production system
+forced us to add four more concerns.
+
+### 6. Messaging
+
+Slack was not just another input adapter. A channel and a thread had to map to
+conversations. Different people needed to continue the same task. Progress,
+questions, and results had to return to the place where the team was already
+working.
+
+This introduced a problem we have not fully solved: when teammates give
+conflicting instructions, whose instruction wins? A private coding session can
+assume one operator. A shared teammate needs an explicit authority model.
+
+**Example**
+
+One engineer could assign an investigation in a Slack thread, another could add
+customer context, and a third could continue the task later. The teammate kept
+its progress and result in that thread while also exposing its active work in
+our internal dashboard. Shared continuity was the feature; unresolved priority
+between conflicting instructions was the risk.
+
+### 7. Skills
+
+A tool says what action is available. A skill explains how our team performs a
+specific job.
+
+For example, investigating a failure through our logs, metrics, and traces
+required a sequence of known methods and query conventions. That procedure was
+too specific for the global system prompt but too important to improvise each
+time. Skills gave us a place to encode it.
+
+This distinction helped us keep the system prompt general while making
+specialized work repeatable.
+
+**Example**
+
+Our observability skill encoded a procedure like this:
+
+```text
+Start with the request or chat ID
+  -> find its trace
+  -> identify failed or slow spans
+  -> correlate them with logs and metrics
+  -> compare behavior across product versions
+  -> produce evidence and a root-cause hypothesis
+  -> launch a coding session only when there is enough evidence for a fix
 ```
-Add context management to my harness. For every tool result, decide:
-what reaches the model, what gets truncated, what gets summarised, what
-gets dropped with a note telling the model how to get the rest.
-Show me the token cost per turn before and after.
-Then make it fail loudly: I want to see it warn, not silently truncate.
+
+`query_traces` gave the model access. The skill taught it how our R&D team
+conducted the investigation.
+
+### 8. Guardrails
+
+At first, we underestimated security. That changed after a real incident made
+the risks concrete: acting with the wrong person's authority and showing data
+to an unintended audience. The details are private, but the lesson is not: once
+a harness serves a team, identity and authorization must travel with every
+action and every retrieved piece of context.
+
+We also found rules that could not be left to a prompt. The harness checked for
+requirements such as tests and linters before opening a PR, blocked production
+SSH access, and enforced task checklists in code.
+
+A system prompt asks the model to behave. A guardrail decides whether an action
+is allowed even when the model behaves incorrectly.
+
+**Example**
+
+Before opening a pull request, code checked that the required tests, linters,
+and task checklist had passed. A production SSH request was blocked. These
+rules still applied if the model skipped a document or insisted that the work
+was already complete.
+
+### 9. Reflection and evaluation
+
+A teammate that repeats the same tool mistake every week is not learning. We
+reviewed previous sessions, promoted useful lessons into internal files and
+documentation, and improved the relevant skills.
+
+That process must be deliberate. Automatically writing every observation into
+long-term memory would preserve noise as easily as knowledge. A proposed lesson
+needs an owner, evidence, and a decision about whether it belongs to one task,
+one team, or the whole company.
+
+**Example: promoting a lesson**
+
+The teammate once repeated the same function call with the same invalid query
+parameters. Finishing that session was not enough, because the next session
+would begin without the correction. We turned the failure into a proposed
+lesson:
+
+```markdown
+When an observability tool rejects a query, do not repeat the identical call.
+Read the returned error, identify the invalid parameter, and correct the query
+before retrying.
 ```
-{: .prompt data-name="Use this prompt to add context management to your harness"}
+{: .file data-name="Proposed lesson"}
 
-### All five, in one flow
+After human review, the lesson was promoted into the internal documentation and
+the observability skill. The path was explicit:
 
-Here is a pentest harness with every part doing its job. The task comes in,
-the harness feeds the model context, the model calls a tool, a guardrail
-checks it, the sandbox runs it, the result becomes the next turn's context,
-and the loop repeats until the objective is met.
-
-![A pentest harness in action: a human gives the task, the harness passes context to the model, the model requests a tool call, a guardrail checks it, the sandbox executes it, and the result feeds the next turn until the agent has proven a foothold and writes a report.](/assets/img/learn/harness-pentest-flow.png)
-
-Read the colors: the human owns the task and the approval, the model owns the
-tool choice, the harness owns the loop and the context, the sandbox owns the
-side effects. The exploit only fires after a human approves it and the
-guardrail confirms it is in scope. That approval gate is the loop and the
-system prompt working together. The `findings.md` at the end is the whole
-point: the environment is where effects actually happen.
-
-### Start from pi, not a framework
-
-Use [pi](https://github.com/badlogic/pi-mono). It is the most minimal open
-source harness I have found that still has the right building blocks, which
-makes it something you can read in an afternoon and then build on.
-
-Build your own on top of it. A research harness, a development harness, a
-malware research harness. The parts above are the same every time. What
-changes is the system prompt, the tools, and what you let through.
-
+```text
+session failure -> proposed lesson -> human review -> documentation or skill
 ```
-I want to build a custom harness on top of pi for <your use case>.
-Read pi's source first and tell me which of the five parts it already
-handles and which I have to write myself.
-Then start with the system prompt and tools. Nothing else yet.
-```
-{: .prompt data-name="Use this prompt to start building your own harness on pi"}
 
-### Or start from mine
+If we rebuilt the system today, we would invest much more in evaluations. A
+successful demo tells you that the path worked once. Evaluations tell you
+whether retrieval, tool selection, authorization, and completion checks keep
+working as the harness changes.
 
-I built the skeleton this post describes, so you do not have to start from an
-empty directory: [github.com/NAVNAV221/harness](https://github.com/NAVNAV221/harness).
+## One task, end to end
 
-It is the five parts above with pi underneath, plus the three things a harness
-needs the moment it stops being a demo: a messaging seam, a guardrail layer that
-blocks a tool call in code rather than asking the prompt nicely, and a reflection
-pass that reads each session and proposes what to build next.
+Before a customer meeting, the team asked the teammate to investigate product
+latency: median, average, p90, and maximum latency; usage across the customer's
+organization; the kinds of questions users asked; and whether releases had
+improved performance over time.
 
-Every part you are meant to replace ships as a small reference implementation
-next to an interview that asks what yours is for. Your answers become a spec, and
-the build prompt reads that spec, so what it writes is your harness and not a
-generic one.
+The teammate recovered earlier discussion from the team's shared context,
+queried logs, metrics, and traces through Grafana and OpenTelemetry, and built a
+dashboard. During the investigation it also found the root cause of a bug. It
+later opened a PR with a fix.
 
-It is a Claude Code plugin, so trying it costs two commands and no clone:
+The first useful research that previously took days arrived in seconds. A human
+still validated the behavior in the end-to-end environment and reviewed the
+code. The harness did not remove the team from the process; it moved the team
+from searching and assembling information to verifying and deciding.
+
+## What we would build differently
+
+The first version grew around one team's reality. That was useful, but every
+new team felt like a new company: different repositories, conventions, people,
+tools, and definitions of done.
+
+I would now separate the system into two layers:
+
+- A generic core for the loop, provider adapters, messaging, authorization,
+  context budgets, and evaluation.
+- A team-owned layer for memory, tools, skills, conventions, and approval
+  policies.
+
+I would also add stronger guardrails and team-isolation tests earlier. The
+unresolved instruction-priority problem deserves a design, not another line in
+the system prompt.
+
+## A harness in another domain
+
+The same anatomy applies outside product R&D. This hypothetical pentest flow
+shows the boundaries clearly: the human owns the task and approval, the model
+chooses tools, the harness owns context and control flow, and the sandbox owns
+the side effects.
+
+![A hypothetical pentest harness in action: a human gives the task, the harness passes context to the model, the model requests a tool call, a guardrail checks it, the sandbox executes it, and the result feeds the next turn until the agent has proven a foothold and writes a report.](/assets/img/learn/harness-pentest-flow.png)
+
+The pentest harness is an example, not the system our team built. What transfers
+between the two is the set of decisions the harness must own.
+
+## Learn from one before you build one
+
+If you already use Claude Code, Codex, pi, or another coding agent, give it a
+small task and watch the cycle: tool request, execution, result, next action.
+Then find where its harness implements each responsibility above.
+
+[pi](https://github.com/badlogic/pi-mono) is a useful codebase for this because
+it is small enough to read while still providing an agentic loop and a model
+translation layer. You do not need to install it to understand this article.
+
+I also maintain [github.com/NAVNAV221/harness](https://github.com/NAVNAV221/harness),
+a separate Claude Code plugin that helps you design and build your own harness.
+It is not the internal AI Harness teammate described here. Its repository contains a
+readable TypeScript skeleton, interviews for defining each component, and
+reference implementations for memory, guardrails, and reflection.
+
+If you already use Claude Code, its guided setup is:
 
 ```
 /plugin marketplace add NAVNAV221/harness
@@ -198,13 +449,13 @@ It is a Claude Code plugin, so trying it costs two commands and no clone:
 ```
 {: .shell}
 
-Four questions later you have a harness with your job in its system prompt and
-your worst case as an enforced rule. The prompts are plain markdown, so if you
-use Codex or pi instead, clone it and paste them in.
+If you do not have a harness or coding agent to run those commands, use the
+repository as source code and the checkpoints in this article as a manual
+review guide. The article does not depend on the plugin.
 
 ### Reference
 
-- [harness](https://github.com/NAVNAV221/harness), the skeleton from this post, forkable
-- [What is a harness](https://earendil.com/posts/what-is-a-harness/) by earendil, the four part version
-- [pi](https://github.com/badlogic/pi-mono), the harness to build on
-- [A smart model doesn't make up for bad context](/2026-06-21-smart-model-bad-context/), why part 5 matters
+- [harness](https://github.com/NAVNAV221/harness), a plugin for designing your own harness
+- [What is a harness](https://earendil.com/posts/what-is-a-harness/) by earendil, the four-part foundation
+- [pi](https://github.com/badlogic/pi-mono), a minimal open source harness
+- [A smart model doesn't make up for bad context](/2026-06-21-smart-model-bad-context/), why context management matters
