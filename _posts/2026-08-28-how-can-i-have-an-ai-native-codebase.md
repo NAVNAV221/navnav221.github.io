@@ -1,10 +1,10 @@
 ---
 layout: post
 permalink: "/learn/ai-native-codebase/"
-title: How can I have an AI Native Codebase?
-subtitle: Four layers that let an agent walk into your repo cold and be useful on the first try.
-share-title: "How can I have an AI Native Codebase?"
-share-description: "An agent opening your repo cold repeats the same mistakes every session. Orientation, capability, enforcement, and self-improvement, so it does the right thing the first time."
+title: Make your codebase teach AI agents how to work in it
+subtitle: A guardrail passed while checking the wrong code. Fixing it taught us what an AI-native codebase requires.
+share-title: "Make your codebase teach AI agents how to work in it"
+share-description: "How orientation, capability, enforcement, and self-improvement help any AI harness understand a codebase and avoid repeating its mistakes."
 categories: Learn
 tags: [AI Native, Agents, Codebase, Claude, Learn]
 thumbnail-img: /assets/img/learn/ai-native-codebase.png
@@ -15,19 +15,44 @@ An agent opening your repo for the first time is a new hire on day one, except
 it forgets everything by tomorrow. Give it nothing and you get the same three
 problems every session:
 
-- **It does not understand the codebase.** Opens a PR that ignores a component
-  you already have. Writes a new class when one already owns that job.
-- **It makes your decisions.** The exploration you should have done, it did for
-  you, in the exact place your brain was supposed to be.
-- **It does not understand the team.** Not the day to day, not what a customer
-  is, not the bigger picture the work sits inside.
+- **It does not understand the codebase.** It ignores an existing component or
+  writes a new class when one already owns that job.
+- **It makes your decisions.** It chooses architecture during the exploration
+  you should have owned.
+- **It does not understand the team.** It lacks the customer context and daily
+  decisions surrounding the code.
 
-The first is what this article is about. The second is the one the four layers
-below do not fix, so I come back to it at the end. The third is the
-[harness](/learn/harness/).
+## Table of contents
 
-An AI native codebase fixes the first in the repo itself, so the fix survives
-the session. Four layers.
+1. [Orientation: where am I?](#1-orientation-where-am-i)
+2. [Capability: what can I do?](#2-capability-what-can-i-do)
+3. [Enforcement: what happens whether I remember it or not?](#3-enforcement-what-happens-whether-i-remember-or-not)
+4. [Self-improvement: what should I do better next time?](#4-self-improvement-what-should-i-do-better-next-time)
+5. [What the four layers do not fix](#what-the-four-layers-do-not-fix)
+6. [Start from the template](#start-from-the-template)
+
+This article addresses the first problem. The second needs an explicit decision
+process, which I return to near the end. The third belongs to the shared
+[AI Harness teammate](/learn/harness/).
+
+We found a concrete example of the first problem in our pull-request guardrail.
+The coding agent was working in a Git worktree, but the hook ran its checks
+against a different checkout. A PR could open even though the files changed by
+the agent had not been validated.
+
+We fixed the hook so it first reads the agent's working directory and runs the
+checks there. This catches problems before they consume CI and E2E capacity or
+move further through the pipeline. The guardrail had been missing an important
+piece of context: where the current task was actually running.
+
+An **AI-native codebase** provides that context inside the repository, so it
+survives one model, one harness, and one session. We could see the change in
+agents' tool calls: they selected more relevant context, followed the right
+references, acted on the right files, and followed repository conventions with
+less guidance.
+
+It takes four layers. The first three shape what the agent can do now. The
+fourth makes the repository improve between sessions.
 
 ![The four layers of an AI native codebase: orientation (where am I?), capability (what can I do?), enforcement (what happens whether I remember or not?), and self-improvement (what should I do better next time?).](/assets/img/learn/ai-native-codebase.png)
 
@@ -65,12 +90,13 @@ Every line there is a mistake somebody made first. That is the test for what
 belongs in a `CLAUDE.md`. Not what is true about your repo, what is expensively
 true.
 
-```
-Read my repo and write the CLAUDE.md a new agent needs before its first change.
-What each top-level area is, which component owns what, and the three mistakes
-someone new always makes here. Rules it can follow, not prose.
-```
-{: .prompt data-name="Use this prompt to start using CLAUDE.md in your repo"}
+**Build checkpoint**
+
+- Map each top-level area and name which component owns what.
+- Record the expensive, surprising facts that repeatedly cause mistakes.
+- Link to detailed documentation instead of injecting it all at startup.
+- Give an agent a cold task and inspect whether its first file reads are the
+  right ones.
 
 ### 2. Capability: what can I do?
 
@@ -102,12 +128,13 @@ Trigger phrases in the words a person would actually type, not yours. The hard
 rules named right there in the description, so the agent knows the skill has an
 opinion before it decides whether to open it.
 
-```
-Find the tasks I repeat with an agent: release, tests in our conventions, and
-one more. Write each as a skill: when to use it, the exact steps, the traps.
-Encode the convention so it stops being something I re-explain every time.
-```
-{: .prompt data-name="Use this prompt to turn your repeated tasks into skills"}
+**Build checkpoint**
+
+- Find three tasks you repeatedly explain to an agent.
+- Write one skill for each, including when to use it, the exact steps, and the
+  traps specific to your repository.
+- Put realistic trigger phrases in the description.
+- Test whether the agent loads the skill without being explicitly told to.
 
 ### 3. Enforcement: what happens whether I remember or not?
 
@@ -180,12 +207,13 @@ that depended on it remembering a rule.
 ![The lint hook refusing a gh pr create call: the command is blocked, and the failing lint output is handed back to the agent.](/assets/img/learn/hook-blocks-pr.png)
 -->
 
-```
-Set up hooks that fire whether or not the agent read the docs.
-Block the edits I never want, run the check I always forget before a commit.
-The guardrail should not depend on the agent choosing to remember it.
-```
-{: .prompt data-name="Use this prompt to add hooks that run whether the agent remembers or not"}
+**Build checkpoint**
+
+- Format or validate files immediately after the agent edits them.
+- Block a pull request when mandatory checks fail.
+- Pass the agent's actual working directory into every hook.
+- Test hooks from the main checkout and from a Git worktree.
+- Make failures visible to both the agent and the human reviewer.
 
 ### 4. Self-improvement: what should I do better next time?
 
@@ -211,30 +239,20 @@ already in its task are sitting in a line it has already loaded. That is also
 why these are linked and not `@`-included: they cost nothing until the moment
 someone needs them.
 
-The best entry in that library came from a bug in the gate above. It linted the
-checkout it happened to live in, not the one the agent was working in, so a PR
-opened from a worktree got checked against a different branch entirely, printed
-"All checks passed!", and exited 0. Here is the same script afterwards:
+The best entry in that library came from the guardrail bug above. The hook
+checked the checkout where its script lived instead of the worktree where the
+agent had changed code. We changed its flow to:
 
-```bash
-#!/usr/bin/env bash
-# Runs before `gh pr create`, because settings.json said so. Exit 2 blocks it.
-
-# LESSON: the agent often works in a git worktree, on a different branch than
-# the checkout this script lives in. Linting the wrong one passes green and
-# tells you nothing. The hook input says which directory it is really in.
-cd "$(jq -r '.cwd')" || exit 0
-
-if ! npm run lint --silent; then
-  echo "Lint failed. Fix it, then open the PR." >&2
-  exit 2
-fi
+```text
+read the agent's working directory
+  -> move into that directory
+  -> run lint against the changed files
+  -> block the PR if lint fails
 ```
-{: .file data-name=".claude/hooks/gate_pr_create.sh"}
 
-One line of fix, and a comment sitting in the file the next person will edit
-rather than in a postmortem nobody reopens. A guardrail that lies to you is
-worse than one you never built, and now nobody has to learn that twice.
+The exact shell code matters less than the promoted lesson: every check must run
+against the agent's current worktree. We recorded that next to the hook, where
+the next person changing it would see it, rather than only in a postmortem.
 
 Lessons also do not have to start as prose somebody remembered to write. Most
 teams already have years of them sitting in PR comments nobody ever read twice.
@@ -249,12 +267,12 @@ flagged in six previous PRs" lands differently from "this looks wrong". Then
 close the loop the other way. A finding that keeps recurring and is still not
 in the lessons library is the next thing to promote.
 
-```
-Add a self-reflection step after a change: what broke, what I learned, where
-that lesson belongs. Then promote it into the docs or a hook, so the next
-session does not repeat it. I want to suffer a mistake once, not twice.
-```
-{: .prompt data-name="Use this prompt to make a lesson stick between sessions"}
+**Build checkpoint**
+
+- End significant tasks by recording what failed and what was learned.
+- Decide whether each lesson belongs in orientation, a skill, or enforcement.
+- Require human review before promoting a lesson into shared instructions.
+- Verify in a fresh session that the agent can discover and apply it.
 
 ### What the four layers do not fix
 
@@ -264,53 +282,43 @@ tells it how you do things here, enforcement blocks the edits you banned, and
 self-improvement stops the repeats. An agent can be perfect on all four and
 still choose your auth model at 2am, inside a diff you skim.
 
-The answer is a step that runs before the code, and the field agrees on that
-much. [GitHub Spec Kit](https://github.com/github/spec-kit) runs specify,
-clarify, plan, tasks, implement, with a clarify step whose whole job is to drag
-out what the spec left vague. [Architecture decision
-records](https://adr.github.io/) are having a revival for the same reason: an
-agent that cannot see why something was built a certain way will cheerfully
-refactor the reason away.
+The missing layer is decision ownership. [GitHub Spec
+Kit](https://github.com/github/spec-kit) and [architecture decision
+records](https://adr.github.io/) both help make decisions visible, but neither
+decides who has authority to make them.
 
-Both write the decision down. Neither settles who owns it, and that is the one
-rule I would add.
+The smallest solution is a stop before code. Keep decisions as a ledger, treat
+the generated plan as a rendering of that ledger, and do not let the agent turn
+its recommendation into implementation before a human answers.
 
-Treat the document as a rendering of a decision ledger, not as prose you edit
-forward. The decisions are the artifact; the write-up is re-emitted from them
-each round, never appended to. The reason is specific. A document you edit in
-place freezes around the agent's recommendation: it proposed B, wrote three
-sections that assume B, and by the time it reaches you, saying "actually A"
-means arguing with a paragraph instead of answering a question. Re-emit
-instead, and the recommendation stays a recommendation until you have answered.
+**Decision checkpoint**
 
-That is a whole subject and its own article. The smallest version that works
-today is to make the agent stop and put the question in front of you.
-
-```
-Before you write any code for this task, list the decisions you are about to
-make for me. For each one: the question, the options, your recommendation, and
-what it costs to change later. Then stop and wait for my answers.
-```
-{: .prompt data-name="Use this prompt to get your decisions back before the agent makes them"}
+Before implementation, require the agent to list the decisions it is about to
+make: the question, available options, its recommendation, and the cost of
+changing later. A human answers those questions before the agent writes code.
 
 ### Start from the template
 
 [ai-native-codebase](https://github.com/NAVNAV221/ai-native-codebase) is a
-copy-paste starting point. A `CLAUDE.md` skeleton and a lessons library for
-orientation. Four skills for capability: `plan-task`, `code-tests`,
-`code-review`, `pr-description`. Hooks that already do something rather than
-sitting there as a comment: format on every edit, checklist injected at session
-start, and a PR gate that lints the files you changed and blocks the PR when
-they come back red. It is Claude shaped, so the paths are `.claude/`, but the
-four questions are the same for any agent: where am I, what can I do, what runs
-no matter what, and what do I do better next time.
+copy-paste starting point. It includes a `CLAUDE.md` skeleton and lessons
+library for orientation; five skills for planning, tests, review, handoff, and
+PR descriptions; and five focused review agents. Its hooks format edits, inject
+the checklist at session start, and block a PR when checks fail.
 
-```
-Take the ai-native-codebase template and adapt it to my repo.
-Start with orientation: a real CLAUDE.md for this codebase, not the stub.
-Then one skill I actually repeat. Nothing else yet.
-```
-{: .prompt data-name="Use this prompt to adapt the template to your repo"}
+The repository README groups the map, toolbox, and rules as three structural
+layers. I count self-improvement as a fourth because reflections and promoted
+lessons change those layers between sessions. The files are Claude Code shaped,
+but the four questions apply to any harness: where am I, what can I do, what
+runs whether I remember it or not, and what should improve next time.
+
+Start small:
+
+1. Copy the orientation structure and replace the stub with a real map of your
+   repository.
+2. Add one skill for a task your team actually repeats.
+3. Add one enforced check that has caught a real mistake before.
+4. Run a fresh agent session and inspect its tool calls, file choices, and
+   response to a failed check.
 
 ### Reference
 
