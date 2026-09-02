@@ -2,7 +2,7 @@
 layout: post
 permalink: "/learn/harness/"
 title: What it took to turn a coding agent into an R&D teammate
-subtitle: Seven PRs in one customer meeting - and nine harness decisions behind them.
+subtitle: Building an agent that could remember team decisions, investigate problems, and ship reviewed code.
 share-title: "What it took to turn a coding agent into an R&D teammate"
 share-description: "What we learned building an AI Harness teammate for an R&D team: the five core parts of a harness, the four production parts we had to add, and the failures that shaped them."
 categories: Learn
