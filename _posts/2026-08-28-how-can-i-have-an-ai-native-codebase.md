@@ -4,9 +4,9 @@ permalink: "/learn/ai-native-codebase/"
 title: Make your codebase teach AI agents how to work in it
 subtitle: A guardrail passed while checking the wrong code. Fixing it taught us what an AI-native codebase requires.
 share-title: "Make your codebase teach AI agents how to work in it"
-share-description: "How orientation, capability, enforcement, and self-improvement help any AI harness understand a codebase and avoid repeating its mistakes."
+share-description: "How orientation, capability, enforcement, self-improvement, and decision ownership help any AI harness understand a codebase and avoid repeating its mistakes."
 categories: Learn
-tags: [AI Native, Agents, Codebase, Claude, Learn]
+tags: [AI Native, Agents, Codebase, RFC, Claude, Learn]
 thumbnail-img: /assets/img/learn/ai-native-codebase.png
 comments: true
 ---
@@ -28,11 +28,12 @@ problems every session:
 2. [Capability: what can I do?](#2-capability-what-can-i-do)
 3. [Enforcement: what happens whether I remember it or not?](#3-enforcement-what-happens-whether-i-remember-or-not)
 4. [Self-improvement: what should I do better next time?](#4-self-improvement-what-should-i-do-better-next-time)
-5. [What the four layers do not fix](#what-the-four-layers-do-not-fix)
+5. [Decision ownership: who decides?](#5-decision-ownership-who-decides)
 6. [Start from the template](#start-from-the-template)
 
-This article addresses the first problem. The second needs an explicit decision
-process, which I return to near the end. The third belongs to the shared
+The first four sections address the first problem. The fifth addresses the
+second, because no amount of context stops an agent from deciding something
+that was yours to decide. The third belongs to the shared
 [AI Harness teammate](/learn/harness/).
 
 We found a concrete example of the first problem in our pull-request guardrail.
@@ -52,7 +53,9 @@ references, acted on the right files, and followed repository conventions with
 less guidance.
 
 It takes four layers. The first three shape what the agent can do now. The
-fourth makes the repository improve between sessions.
+fourth makes the repository improve between sessions. A fifth, which the
+diagram below does not cover, decides what the agent is not allowed to settle
+on its own.
 
 ![The four layers of an AI native codebase: orientation (where am I?), capability (what can I do?), enforcement (what happens whether I remember or not?), and self-improvement (what should I do better next time?).](/assets/img/learn/ai-native-codebase.png)
 
@@ -274,28 +277,129 @@ in the lessons library is the next thing to promote.
 - Require human review before promoting a lesson into shared instructions.
 - Verify in a fresh session that the agent can discover and apply it.
 
-### What the four layers do not fix
+### 5. Decision ownership: who decides?
 
 Go back to the second problem at the top: it makes your decisions. None of the
-four layers touch it. Orientation tells the agent where things are, capability
-tells it how you do things here, enforcement blocks the edits you banned, and
-self-improvement stops the repeats. An agent can be perfect on all four and
-still choose your auth model at 2am, inside a diff you skim.
+first four layers touch it. Orientation tells the agent where things are,
+capability tells it how you do things here, enforcement blocks the edits you
+banned, and self-improvement stops the repeats. An agent can be perfect on all
+four and still choose your auth model at 2am, inside a diff you skim.
 
-The missing layer is decision ownership. [GitHub Spec
-Kit](https://github.com/github/spec-kit) and [architecture decision
-records](https://adr.github.io/) both help make decisions visible, but neither
-decides who has authority to make them.
+Ours did something more expensive than that. A customer asked, in a shared
+channel, for a way to trigger a scheduled run. The agent researched it and
+recommended a new permissions object. We built that. Five days later we
+reverted the whole thing, and the revert shipped a tenant-isolation bug of its
+own.
 
-The smallest solution is a stop before code. Keep decisions as a ledger, treat
-the generated plan as a rendering of that ledger, and do not let the agent turn
-its recommendation into implementation before a human answers.
+The answer had been available on day one. A teammate had already named the
+existing object to extend, and when the question was put to the customer in
+their own thread, they said the same thing in plainer words: they wanted the
+simplest possible scheduled trigger, and were not convinced a new permissions
+object was what they needed. Both answers landed in an early cycle of the
+document. Neither was carried into the next one. Five agent-days went into
+converging on a design that had been ruled out before it started.
 
-**Decision checkpoint**
+Nothing was wrong with the research. What was wrong is that the decisions lived
+in prose. Prose is append-only, so the document grew into a record of every
+position anyone had ever held, and the one answer that mattered sank into it.
+By the time the agent was writing implementation phases, the body had already
+frozen around its own recommendation.
 
-Before implementation, require the agent to list the decisions it is about to
-make: the question, available options, its recommendation, and the cost of
-changing later. A human answers those questions before the agent writes code.
+[GitHub Spec Kit](https://github.com/github/spec-kit) and [architecture
+decision records](https://adr.github.io/) both make decisions visible. Neither
+says who owns them. So we stopped treating the decisions as content in a
+document and started treating the document as a rendering of the decisions.
+
+An RFC here is a directory, one file per section, in the repo next to the code
+it proposes.
+
+```text
+rfcs/TICKET-24__scheduled-triggers/
+  000_meta.md               status, appetite, and the human who approves
+  001_tldr.md
+  002_decisions.md          the ledger - everything else renders from it
+  003_existing-surfaces.md  what already exists, with file:line citations
+  005_proposals.md
+  006_sequencing-cost.md
+```
+{: .file data-name="rfcs/<TICKET>__<slug>/"}
+
+Two rules make the split worth the ceremony. The ledger is **re-emitted** every
+cycle, never appended to: a resolved decision stops rendering as an open block
+and becomes a one-line row, so the file shrinks as the RFC converges instead of
+growing into a transcript. And no proposal may be drafted around a decision
+that is still open. The sections it affects render `LOCKED - pending D4` until
+a human answers, so there is no frozen body to rewrite, because the body was
+never written.
+
+`003_existing-surfaces.md` is where this layer reaches back into the first one.
+Before drafting a single option the agent has to enumerate what already exists,
+with citations. Then every option that proposes a new table, endpoint or model
+has to carry a sibling option that extends the nearest existing one. The
+options in front of the human end up looking like this, each tagged with what
+it does to the codebase:
+
+```text
+Q3  TECHNICAL   Which ETL generation is the target?
+
+  A   ship against today's full-rebuild writer   (existing-surface, extend-existing)
+  B   build against the v2 branch                (existing-surface, extend-existing)
+  C   both, in the same ticket    [Recommended]  (existing-surface, extend-existing)
+  Other   write your own answer
+```
+{: .file data-name="002_decisions.md, as the reviewer sees it"}
+
+That is the rule the revert above was missing. It is also why the citations in
+orientation earn their keep twice: they stop the agent inventing during
+implementation, and they stop it offering you invented options during design.
+
+Each decision carries a status, and only some of them let the RFC merge.
+
+| Status | Meaning | Can it merge? |
+|---|---|---|
+| `OPEN` | nobody decided, no default applied | blocks |
+| `DEFAULTED` | the agent picked, no human has seen it | blocks |
+| `DELEGATED` | a human read it and waved it through | passes |
+| `DECIDED` | a named human picked an option | passes |
+| `OTHER` | answered off-menu, so the framing failed | blocks |
+| `SPIKE` | a risk both unverified and irreversible | blocks until proven |
+
+The load-bearing row is the gap between `DEFAULTED` and `DELEGATED`. Both mean
+nobody argued. Only one means a human looked. Our first version of this checked
+that no question was still marked open, which could not tell those two apart,
+so every question the agent quietly answered for itself counted as settled.
+That is the failure the whole table exists to name.
+
+`OTHER` is the row worth stealing. An off-menu answer is not a decision, it is
+evidence that the options were wrong, so it blocks until the question is
+reframed. The customer above answered `OTHER`. Three carefully grounded options
+and none of them was the thing they wanted.
+
+The rest is a review cycle with the shape of a pull request, because it is one.
+The agent opens the RFC as a PR. Teammates answer the round's questions,
+picking a letter or writing their own, and comment inline. When the round is
+answered a human triggers one revision, the agent rewrites the ledger against
+the answers, and a new round appears. Two approvals merge it, and the merged
+RFC is the brief the implementation session reads.
+
+Answers do not have to come from your team. The question about the new
+permissions object went into the customer's thread verbatim, and their reply
+came back as the answer of record. That is the practical payoff of holding
+decisions as data instead of prose: each one is small enough, and legible
+enough, to ask anybody.
+
+**Build checkpoint**
+
+- Make the agent list its decisions before it writes code: the question, the
+  options, its recommendation, and the cost of changing later.
+- Ground every option in a file that already exists, and give every option that
+  invents something a sibling that extends something.
+- Record who answered, and never let "the agent defaulted" look the same as
+  "a human delegated".
+- Allow off-menu answers, and treat one as a failed question rather than a
+  decision.
+- Block the merge on unresolved decisions, the same way section 3 blocks a pull
+  request on a failing check.
 
 ### Start from the template
 
@@ -307,9 +411,11 @@ the checklist at session start, and block a PR when checks fail.
 
 The repository README groups the map, toolbox, and rules as three structural
 layers. I count self-improvement as a fourth because reflections and promoted
-lessons change those layers between sessions. The files are Claude Code shaped,
-but the four questions apply to any harness: where am I, what can I do, what
-runs whether I remember it or not, and what should improve next time.
+lessons change those layers between sessions. Decision ownership is the fifth,
+and the only one that is not really about the agent. The files are Claude Code
+shaped, but the five questions apply to any harness: where am I, what can I do,
+what runs whether I remember it or not, what should improve next time, and what
+is not mine to decide.
 
 Start small:
 
@@ -319,6 +425,8 @@ Start small:
 3. Add one enforced check that has caught a real mistake before.
 4. Run a fresh agent session and inspect its tool calls, file choices, and
    response to a failed check.
+5. On the next task worth more than a day, make the agent write its decisions
+   down and wait for you before it writes any code.
 
 ### Reference
 
