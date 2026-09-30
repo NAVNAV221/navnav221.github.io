@@ -249,6 +249,11 @@ defaults:
       path: "" # any file that's not a post will be a "page" layout by default
     values:
       layout: "page"
+  -
+    scope:
+      path: "portfolio" # password-protected application portfolio, keep it unlisted
+    values:
+      sitemap: false
 
 # Make pages folder to seems like root directory - 'https://~~~~/page1'
 include: ['_pages']
