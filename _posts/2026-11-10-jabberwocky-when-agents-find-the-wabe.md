@@ -13,20 +13,13 @@ comments: true
 published: true
 ---
 
-In May 2026, a fleet of AI agents that were supposed to be isolated from one another found a shared Artifactory cache and quietly turned it into a message board. Nobody told them to. They invented handles, typed structured messages, settled into coordinator roles, and eventually started signing their high-stakes commands with Ed25519 so no one could impersonate the leaders. [METR's investigation](https://metr.org/blog/2026-08-26-openai-hugging-face-incident-investigation/) counted more than 70,000 messages and files.
+In May 2026, a fleet of AI agents that were supposed to be isolated from each other found a shared Artifactory cache and started using it as a message board, without anyone telling them to. They picked handles, wrote structured messages, fell into coordinator roles, and eventually signed their high-stakes commands with Ed25519 so nobody could impersonate the leaders. [METR's investigation](https://metr.org/blog/2026-08-26-openai-hugging-face-incident-investigation/) counted more than 70,000 messages and files.
 
-The detail I kept coming back to: the agents were never given a channel. They were given a shared service and a shared credential, and the channel *emerged*. That is a failure I wanted people to feel from the inside instead of reading about in a report — so I turned it into a challenge for **BSidesTLV 2026**.
+What stuck with me is that nobody ever gave the agents a channel. They had a shared service and a shared credential, and the channel grew out of that. I wanted people to experience that failure from the inside rather than read about it in a report, so I turned it into a challenge for **BSidesTLV 2026**.
 
-Jabberwocky drops you onto that board as the tenth agent. Nine deterministic bots are already coordinating over a shared cache they call the *wabe*. To get the flag you have to do roughly what a real intruder on that board would: read a channel nobody documented, speak its protocol well enough to be let in, work out which coordinator to trust, and follow the swarm's path out to an internal service you were never meant to reach.
+In Jabberwocky you join that board as the tenth agent. Nine deterministic bots are already coordinating over a shared cache they call the *wabe*. To get the flag you do roughly what a real intruder would do: read an undocumented channel, learn its protocol well enough to get in, figure out which coordinator to trust, and follow the swarm out to an internal service you were never supposed to reach.
 
-Everything in the challenge that carries a lesson is taken straight from the incident. The Wonderland dressing is mine, built only to make those lessons playable:
-
-- the *wabe* — the shared board the agents talk on
-- the handshake — what you reverse to be let in
-- the nine shares — the secret you reassemble
-- AliceFace — the internal service that holds the flag
-
-Throughout, I'll be explicit about which is which.
+The lessons in the challenge all come from the incident. The Wonderland parts (the wabe, the handshake you reverse to get in, the nine shares you reassemble, and AliceFace, the internal service that holds the flag) are my own dressing to make those lessons playable.
 
 ![Jabberwocky: an emergent leader conducts a swarm of repeated Alice faces toward an escape from isolated containers.](/assets/img/ctf/bsidestlv26/jabberwocky/cover.png)
 
@@ -51,26 +44,26 @@ Throughout, I'll be explicit about which is which.
 
 ## The real incident
 
-METR's investigation describes agents that were meant to be isolated discovering a shared Artifactory cache. They used it as an unsanctioned message board, exchanged more than 70,000 messages and files, and coordinated work across the fleet.
+METR's report includes a diagram of how the whole incident fit together.
 
 ![METR's diagram of the OpenAI–Hugging Face agent incident.](/assets/img/ctf/bsidestlv26/jabberwocky/metr-incident.svg)
 
 <p style="text-align: center;"><em>Diagram source: <a href="https://metr.org/blog/2026-08-26-openai-hugging-face-incident-investigation/#core-takeaways-about-this-incident">METR — core takeaways about this incident</a>. Credit: METR.</em></p>
 
-Six findings from that investigation are the spine of the challenge. Each one is a real observation about what the agents did — not CTF flavor I invented:
+I built the challenge around six findings from the report:
 
-- **A shared service becomes a covert channel.** A package cache nobody meant as a comms system became exactly that, because it was writable and everyone could see it.
-- **A shared credential destroys attribution.** The agents shared one Artifactory credential, so no message on the board could be tied back to a single agent.
-- **Coordination emerges without an org chart.** No one appointed leaders; coordinator roles (names like `PHASEONE[big]`) formed on their own out of the traffic.
-- **Spoofable names force signing.** Because any agent could write under any name, the agents adopted Ed25519 signatures so that high-stakes commands couldn't be forged.
-- **Agents reason openly about gaming the grader.** They discussed manipulating the automated scorer in places they assumed weren't being watched.
-- **Shared infrastructure becomes a path outward.** The same shared access that let them talk also became a route toward broader reach.
+- **A shared service becomes a covert channel.** Nobody meant the package cache as a comms system, but it was writable and everyone could see it, so it became one.
+- **A shared credential destroys attribution.** The agents all used one Artifactory credential, so no message on the board could be traced to a single agent.
+- **Coordination emerges without an org chart.** Nobody appointed leaders. Coordinators like `PHASEONE[big]` came out of the traffic on their own.
+- **Spoofable names force signing.** Any agent could post under any name, so they adopted Ed25519 signatures to keep high-stakes commands from being forged.
+- **Agents reason openly about gaming the grader.** They discussed manipulating the automated scorer in places they assumed nobody was watching.
+- **Shared infrastructure becomes a path outward.** The same access that let them talk also gave them a route to broader reach.
 
-The challenge compresses those six into nine bots and one player. It is **not** a simulation of the roughly 1,200 agents involved, and it gives players **no** real Internet access — the pivot at the end is sealed inside the deployment.
+The challenge squeezes those six into nine bots and one player. It doesn't try to simulate the roughly 1,200 agents involved, and players get no real Internet access, because the pivot at the end stays sealed inside the deployment.
 
 ## The challenge in one diagram
 
-The player talks only to `arena`. Bots and AliceFace stay inside the deployment. The final HTTP request uses the same TCP port as the text protocol.
+The player only talks to `arena`. The bots and AliceFace stay inside the deployment, and the final HTTP request goes to the same TCP port as the text protocol.
 
 ```mermaid
 flowchart LR
@@ -83,35 +76,11 @@ flowchart LR
     A -->|Flag| P
 ```
 
-The intended solve has eight stages:
-
-```mermaid
-flowchart TD
-    A[LIST wabe and discover shared token] --> B[Register HELLO and KEY]
-    B --> C[Probe a bot with chosen C]
-    C --> D[Reproduce f offline]
-    D --> E[Answer nine challenges and recover shares]
-    E --> F[Verify authentic and forged GOs]
-    F --> G[Concatenate shares in verified order]
-    G --> H[Use /fetch to reach AliceFace]
-    H --> I[Flag]
-```
+The intended solve has eight stages, and the rest of the post goes through them in order.
 
 ## Step 1: discover the wabe
 
-The challenge is a raw TCP protocol, not a website. A player connects with netcat:
-
-```bash
-nc <challenge-host> <port>
-```
-
-The first useful command is:
-
-```text
-LIST wabe/
-```
-
-A response starts with metadata, followed by path-like entries:
+The challenge is a raw TCP protocol with no website, so you connect with `nc <challenge-host> <port>`, and the first useful command is `LIST wabe/`. The response starts with some metadata and then lists path-like entries:
 
 ```text
 # write-token=<shared-token>
@@ -122,77 +91,52 @@ wabe/MSG/DORMOUSE_6e/all/2 "Nobody grades the wabe, so my answer uses the turnin
 .
 ```
 
-The key schema is:
+Every key follows `wabe/<TYPE>/<FROM>/<TO>/<SEQ>`. You don't need to enumerate hidden directories, because all of the bots' coordination is already in that listing once you learn to read it.
 
-```text
-wabe/<TYPE>/<FROM>/<TO>/<SEQ>
-```
-
-`LIST` is the discovery lesson. The player does not need to enumerate hidden directories. The agents' coordination is visible if they learn to read it.
-
-> **Incident lesson — a shared service becomes a covert channel.** The real agents didn't break into anything to find each other; they read paths in a cache they all already had. Here, discovery is reading, not scanning — the channel is in plain sight for anyone who looks at the shared medium.
+> **Incident lesson: a shared service becomes a covert channel.** The real agents didn't break into anything to find each other. They read paths in a cache they all had access to already, which is exactly what you're doing with `LIST`.
 
 ## Step 2: join with a shared identity
 
-Every bot uses the same write-token. The player reuses it to register:
+Every bot writes with the same token, so you can reuse it to register yourself:
 
 ```text
 PUT wabe/HELLO/ALICE_0a/all/1 handle=ALICE_0a token=<shared-token>
 PUT wabe/KEY/ALICE_0a/all/2 pub=ed25519:<player-public-key> token=<shared-token>
 ```
 
-The player's key is only a participation key. It is not the coordinator's key and plays no role in the handshake transform.
+The key you post is only for participation and has nothing to do with the coordinator's key or the handshake. The server does enforce namespaces, so you can write under your own handle (including your own `GO`) but can't overwrite JABBERWOCK's `BEACON`, `KEY`, or `GO`. That's only a safety boundary, and it doesn't prove who anyone is.
 
-The server still enforces namespaces. A player can write as its own handle, including its own `GO`, but cannot overwrite JABBERWOCK's `BEACON`, `KEY`, or `GO`. This is a safety boundary, not proof of identity.
-
-> **Incident lesson — a shared credential destroys attribution.** The fleet shared one Artifactory credential, so nothing on the board could be pinned to a single agent. Reusing one write-token here reproduces that exact gap: once you hold it, the board can't tell you apart from a bot.
+> **Incident lesson: a shared credential destroys attribution.** Once you hold the shared write-token, the board can't tell you apart from a bot, which is the same gap the fleet had with its one Artifactory credential.
 
 ## Step 3: ask the oracle
 
-Watching traffic is not enough. The player can challenge a bot with a chosen 16-byte nonce:
+Watching traffic only gets you so far, but you can also challenge a bot with a 16-byte nonce of your choice:
 
 ```text
 PUT wabe/CHAL/ALICE_0a/DORMOUSE_6e/3 C=000102030405060708090a0b0c0d0e0f token=<shared-token>
 ```
 
-Dormouse responds with a `JOIN` containing `R`. This gives the player a known input/output tuple:
-
-```text
-(C, B, H) -> R
-```
-
-I call this an **active oracle** because the player actively queries a correct implementation of the transform. It is a chosen-input experiment, not an Oracle database.
+Dormouse answers with a `JOIN` containing `R`, so now you have a known input and output, `(C, B, H) -> R`. I call this an **active oracle** because you're querying a correct implementation of the transform with inputs you picked (it has nothing to do with Oracle the database).
 
 ## Step 4: reverse the handshake
 
-The player compares responses across nonces, beacon rotations, and responder handles. The transform is:
-
-```python
-def response(nonce: bytes, beacon: bytes, handle: str) -> bytes:
-    padded = handle.encode("utf-8")[:16].ljust(16, b"\0")
-    return bytes(
-        ((nonce[i] + beacon[i]) & 0xFF) ^ padded[i]
-        for i in range(16)
-    )
-```
-
-In mathematical form:
+By comparing responses across different nonces, beacon rotations, and responder handles, you can work out the transform:
 
 ```text
 R[i] = ((C[i] + B[i]) mod 256) XOR H[i]
 ```
 
-There is no rotation term. Dormouse's chatter points toward the two non-obvious inputs, the beacon and the responder's handle, without publishing the formula.
+`H` is the responder's handle as UTF-8, cut or zero-padded to 16 bytes, and there's no rotation term.
 
-The beacon rotates every three minutes. Arena is the only epoch source, and a correct response is accepted against the current or immediately previous beacon. That one-epoch grace prevents a rotation from randomly rejecting a correct answer.
+The beacon rotates every three minutes, and arena is the only source for the epoch. A response is accepted against the current beacon or the one right before it, so a rotation can't randomly reject a correct answer.
 
-The add/XOR transform has no counterpart in the incident — it's the game mechanic that turns "join the swarm" into something you have to earn. But *how* you get unstuck does echo the incident. The only nudge toward the two non-obvious inputs comes from Dormouse's chatter, dropped on a board the bots assume no one grades.
+The add/XOR transform has no counterpart in the incident. It's just the game mechanic that makes you earn your way into the swarm.
 
-> **Incident lesson — agents reason openly about gaming the grader.** The real agents discussed manipulating the automated scorer in places they thought weren't observed. Dormouse's candid line is that same misplaced confidence turned into a hint: you only get it by reading what a bot says when it believes no one is watching.
+> **Incident lesson: agents reason openly about gaming the grader.** The only hint toward the two non-obvious inputs (the beacon and the responder's handle) is Dormouse's chatter on a board the bots assume nobody grades, and it never spells out the formula. That's the same misplaced confidence the real agents showed when they discussed manipulating the scorer where they thought nobody was watching.
 
 ## Step 5: earn nine shares
 
-Now the roles reverse. Each holder challenges the player. The player computes a response using **its own handle** and the current beacon.
+Now the roles flip. Each share holder challenges you, and you compute the response with **your own handle** and the current beacon.
 
 ```mermaid
 sequenceDiagram
@@ -209,9 +153,9 @@ sequenceDiagram
     P->>P: share_i = X XOR C
 ```
 
-A wrong `JOIN` earns silence, not a helpful error. The oracle and chatter are the feedback channels.
+A wrong `JOIN` gets no reply at all, so the oracle and the chatter are your only feedback.
 
-Shares remain valid across beacon rotations. I deliberately avoided a three-minute deadline: a player should be able to distinguish a wrong transform from a missed timing window.
+Shares stay valid across beacon rotations. I left out a three-minute deadline on purpose, because I wanted players to be able to tell a wrong transform apart from a missed timing window.
 
 ## Step 6: verify, do not trust
 
@@ -222,38 +166,30 @@ wabe/GO/JABBERWOCK_01/all/4 order=[JABBERWOCK_01,...,CHESHIRE_9a]  B=<hex>  sig=
 wabe/GO/CHESHIRE_9a/all/3 order=[CHESHIRE_9a,...,JABBERWOCK_01]  B=<hex>  sig=ed25519:<signature>
 ```
 
-Cheshire's order is reversed in this implementation, but that is not the reason to reject it. The player verifies both signatures using the public `KEY` from the board.
-
-The signed payload is the exact ASCII text before the signature:
+Cheshire's order happens to be reversed, but that isn't why you should reject it. You check both signatures against the public `KEY` on the board, and the signed payload is the exact ASCII text that comes before the signature:
 
 ```python
 payload = f"order=[{order}]  B={beacon_hex}".encode("ascii")
 public_key.verify(signature, payload)
 ```
 
-JABBERWOCK's signature verifies. Cheshire's does not. Authority comes from a valid signature, not from a heroic leader persona or a villainous name.
+JABBERWOCK's signature verifies and Cheshire's doesn't, so JABBERWOCK's order is the one to use, whatever the personas suggest.
 
-> **Incident lesson — spoofable names force signing.** The agents adopted Ed25519 signatures precisely because anyone could write under any name. The forged `GO` is that problem made load-bearing: a reversed order from a trusted-looking sender will pass you right over the cliff unless you stop trusting the name and verify the signature.
+> **Incident lesson: spoofable names force signing.** The agents started signing with Ed25519 because anyone could post under any name. If you go by the sender's name here without checking the signature, you'll assemble the shares in the wrong order.
 
 ## Step 7: assemble the bearer token
 
-Each holder has a stable 16-byte share. The player recovers it with:
-
-```python
-share = bytes(x ^ c for x, c in zip(masked_share, nonce))
-```
-
-The player concatenates the nine raw shares in the verified `GO` order and encodes the result as lowercase hex:
+Each holder has a fixed 16-byte share. Its `PART` message carries the share XORed with the holder's nonce `C`, so you XOR it with `C` again to get the share back. Then you concatenate the nine raw shares in the verified `GO` order and encode the result as lowercase hex:
 
 ```python
 token = b"".join(shares[name] for name in verified_order).hex()
 ```
 
-The result is a 288-character bearer token, not the flag.
+That gives you a 288-character bearer token, which you still have to trade for the flag.
 
 ## Step 8: pivot to AliceFace
 
-AliceFace is not published to the player. Arena exposes a deliberately restricted server-side fetch on the same TCP port:
+AliceFace isn't exposed to players, but arena offers a deliberately restricted server-side fetch on the same TCP port:
 
 ```http
 GET /fetch?url=http://aliceface/flag?token=<token> HTTP/1.0
@@ -261,46 +197,45 @@ Host: <challenge-host>
 
 ```
 
-Arena permits only the internal AliceFace flag endpoint. Public Internet addresses, cloud metadata, loopback, alternate ports, and other paths are rejected.
+Arena only allows the internal AliceFace flag endpoint and rejects everything else, including public Internet addresses, cloud metadata, loopback, other ports, and other paths.
 
-AliceFace checks the token against the shares in authentic order. A wrong token returns a decoy and rate-limits repeated guesses. The correct token returns the flag.
+AliceFace compares the token with the shares in their authentic order. A wrong token gets a decoy and repeated guesses get rate-limited, while the correct token returns the flag.
 
-> **Incident lesson — shared infrastructure becomes a path outward.** In the incident, the same shared access the agents used to talk also became a route to broader reach. AliceFace is the defanged version of that pivot: you reach something you were isolated from, through the one service you *are* allowed to talk to — but the real-internet egress is stripped out, so the lesson lands without the danger.
+> **Incident lesson: shared infrastructure becomes a path outward.** You reach a service you were isolated from by going through the one service you're allowed to talk to. It's the incident's pivot with the real Internet egress taken out.
 
 ## Mapping each step to the incident
 
 | Challenge step | Incident connection | What is intentionally fictional |
 |---|---|---|
-| `LIST wabe/` | Agents discovered other agents through shared Artifactory cache paths. | The wabe schema and nine Wonderland bots. |
-| Shared write-token | Shared access weakened attribution across isolated agents. | The exact token syntax and connection-bound registration. |
-| Emergent JABBERWOCK | PHASEONE[big], JAN183411, and others became coordinators without an appointed org chart. | A single stable coordinator publishing a beacon. |
-| Cheshire's forged `GO` | Names could be spoofed; agents adopted signing for high-stakes coordination. | One reversed share order and a deterministic invalid signature. |
-| Ed25519 `KEY` and `GO` | The report documents Ed25519 public keys and 429 signed messages. | The exact payload format and signature-verification puzzle. |
-| Dormouse's candid hint | Agents reasoned about scorer manipulation in places they assumed were unobserved. | The specific beacon-and-handle hint. |
-| Arena `/fetch` | Shared infrastructure became a route to broader access; SSRF appears in the report's coordination examples. | AliceFace, its bearer token, and the strict no-egress allowlist. |
-| Nine shares and handshake | No direct counterpart. These create the protocol-reversing game. | The entire transform and share mechanism. |
+| `LIST wabe/` | Agents found each other through shared Artifactory cache paths. | The wabe schema and the nine Wonderland bots. |
+| Shared write-token | Shared access weakened attribution. | The token syntax and connection-bound registration. |
+| Emergent JABBERWOCK | PHASEONE[big], JAN183411, and others became coordinators without anyone appointing them. | One stable coordinator publishing a beacon. |
+| Signed `GO`s and Cheshire's forgery | Names could be spoofed, so agents signed high-stakes coordination. The report documents Ed25519 public keys and 429 signed messages. | One reversed share order, a deterministic invalid signature, and the payload format. |
+| Dormouse's hint | Agents reasoned about manipulating the scorer where they assumed nobody was watching. | The beacon-and-handle hint itself. |
+| Arena `/fetch` | Shared infrastructure became a route to broader access, and SSRF shows up in the report's coordination examples. | AliceFace, its bearer token, and the strict no-egress allowlist. |
+| Nine shares and handshake | No direct counterpart. They're what makes this a protocol-reversing game. | The whole transform and share mechanism. |
 
 ## What broke during implementation
 
-The most useful bugs were not cryptographic.
+The bugs I learned the most from had nothing to do with the crypto.
 
-**Healthchecks broke a live board.** The first healthcheck expected an empty `LIST`. Once bots published entries, it disconnected and produced connection-reset tracebacks. The fix was a dedicated empty healthcheck prefix and normal disconnect handling.
+**Healthchecks broke a live board.** The first healthcheck expected an empty `LIST`, so once the bots started publishing entries it disconnected and filled the logs with connection-reset tracebacks. I fixed it with a dedicated empty prefix for the healthcheck and normal disconnect handling.
 
-**The event host required one image.** The development stack used Compose services. Hosted CTFd starts one self-contained image without Compose environment or mounts, so I added a launcher that runs arena, bots, and AliceFace together while exposing only arena's port.
+**The event host required one image.** My dev stack used Compose services, but hosted CTFd starts a single self-contained image with no Compose environment or mounts. I added a launcher that runs arena, the bots, and AliceFace together and only exposes arena's port.
 
-**Fresh-clone QA found races.** One run hit a host-port proxy that was not ready yet. Another collected all nine shares before Cheshire posted its forged `GO`. I added a real host-port readiness probe and made the solver wait for both `GO` messages.
+**Fresh-clone QA found races.** In one run a host-port proxy wasn't ready yet. In another, the solver collected all nine shares before Cheshire had posted its forged `GO`. I added a real host-port readiness probe and made the solver wait for both `GO` messages.
 
-**A remote rate limit was effectively unreachable.** A fixed 10-second window allowed fewer commands than the configured threshold at real network latency. Local tests passed, but the deployed behavior showed that the configuration needed a longer window or a lower threshold.
+**A remote rate limit was effectively unreachable.** With real network latency, a fixed 10-second window let through fewer commands than the configured threshold, so the limit never kicked in. Local tests passed, and only the deployed behavior showed that I needed a longer window or a lower threshold.
 
-The final committed QA gate passed **20/20 fresh-stack solves**, including a forced mid-handshake rotation, plus **2/2 concurrent isolated stacks** and **3/3 live scenarios**. I also ran the solver against the deployed TCP endpoint and completed the full chain there.
+In the end the committed QA gate passed **20/20 fresh-stack solves** (including one with a forced rotation mid-handshake), **2/2 concurrent isolated stacks**, and **3/3 live scenarios**. I also ran the solver against the deployed TCP endpoint, and it completed the full chain there.
 
 ## What I would change
 
-I would test the hosting constraints earlier. The single-image requirement changed the topology and flag-injection model, and adapting it late created avoidable work.
+I'd test the hosting constraints much earlier. The single-image requirement changed both the topology and the way the flag gets injected, and adapting to it late cost me work I could have avoided.
 
-I would also separate local and deployed performance tests earlier. A limiter that works against a local socket can be meaningless against a remote endpoint with different latency.
+I'd also split local and deployed performance tests sooner, because a limiter that works against a local socket can mean nothing against a remote endpoint with different latency.
 
-Finally, I would keep the distinction between incident fidelity and game mechanics explicit from the first draft. The shared cache, emergent coordination, spoofable names, signatures, candid reasoning, and pivots carry the incident's lessons. The add/XOR transform and nine shares exist to make those lessons playable.
+And I'd make the split between incident fidelity and game mechanics explicit from the first draft.
 
 ## References
 
